@@ -16,6 +16,8 @@ System.config({
     "d3": "github:mbostock/d3@3.5.12",
     "guardian/iframe-messenger": "github:guardian/iframe-messenger@master",
     "json": "github:systemjs/plugin-json@0.1.0",
+    "olado/doT": "github:olado/doT@1.0.1",
+    "ractive": "github:ractivejs/ractive@0.7.3",
     "reqwest": "github:ded/reqwest@1.1.5",
     "text": "github:systemjs/plugin-text@0.0.2",
     "traceur": "github:jmcriffey/bower-traceur@0.0.91",

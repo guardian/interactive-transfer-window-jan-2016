@@ -1,0 +1,64 @@
+.column {
+    position:relative;
+    top: 0px;
+    display: inline-block;
+    float: left;
+    position: relative;
+
+}
+
+
+#detail-view {
+            position: relative;
+            width: 100%;
+            min-width: 280px;
+            max-width:899px;
+            background-color: #fff;
+            padding: 60px 0 0 0;
+            display: none;
+            border-top: 2px solid #4bc6df;
+            overflow: hidden;
+        }
+
+        #back-button {
+            position: absolute;
+            top: 5px;
+            left: 0px;
+            width: 72px;
+            height: 32px;
+            background: #000;
+            cursor: pointer;
+            font-family: "Guardian Agate Sans", Arial, sans-serif;
+            font-size: 14px;
+            background:url('../images/btn_close.png') no-repeat;
+            background-position: -3px 0px;
+            padding: 9px 0 0 33px;
+            color: #a7a9ac;
+        }
+
+        #back-button:hover {
+                background-position: -3px -32px;
+            }
+
+/* ********************************************* */
+
+        #center-panel{
+            width:300px;
+            
+            border-left: none;
+        }
+
+        #left-panel {
+            width:200px;
+            height:auto;
+            padding: 12px 0 0 6px;
+            margin-right:20px;
+        }
+
+        .detail_header{
+            font-family: "Guardian Egyptian Headline", Georgia, serif;
+            font-weight:700;
+            font-size: 2.2em;
+            width:100%;
+            padding: 3px 0 0 6px;
+        }

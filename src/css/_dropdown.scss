@@ -12,7 +12,7 @@
 
 .styled-select {
     float:right;
-    width:181px;
+    width:180px;
     height:34px;
     padding-left:10px;
     overflow:hidden;
@@ -29,7 +29,7 @@
     color:#fff
 }
 
-#filter-dropdown {
+.gv-select {
     background:transparent;
     width:192px;
     padding: 5px 5px 5px 2px;
@@ -46,7 +46,7 @@
     cursor:pointer
 }
 
-#filter-dropdown option {
+.gv-select option {
     padding:10px;
     border-bottom:1px solid #767676;
     font-weight:400;
