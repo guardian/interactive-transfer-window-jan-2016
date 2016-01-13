@@ -2,9 +2,14 @@ import iframeMessenger from 'guardian/iframe-messenger'
 import reqwest from 'reqwest'
 import mainHTML from './text/main.html!text'
 import share from './lib/share'
+import underscore from 'underscore'
+import d3 from 'd3';
+
+var _ = underscore;
 
 var shareFn = share('Guardian football transfer window', 'http://gu.com/p/URL', '#Interactive');
-var premClubs = [];
+var premClubsArr = [];
+var transfersArr;
 
 export function init(el, context, config, mediator) {
     iframeMessenger.enableAutoResize();
@@ -27,6 +32,12 @@ export function init(el, context, config, mediator) {
 
 
 function modelData(r){
-    console.log(r.sheets.Data)
+console.log(d3);
+
+    _.each(r.sheets.Data, function(item, i){
+        console.log(item)
+    })
+
+
 
 }
