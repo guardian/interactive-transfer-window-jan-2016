@@ -16,15 +16,19 @@ var totalSpend;
 var shareFn = share('Guardian football transfer window', 'http://gu.com/p/URL', '#Interactive');
 var premClubsArr = [];
 var colorsArr = [];
-var transfersArr, myCutsIndex, treeJson, playerCountArray, rootJSON;
+var transfersArr, myCutsIndex, treeJson, playerCountArray, rootJSON, parseData, dataset, starData, leaguesArray, nationalitiesArray;
 var myView = false;
 
 var globalW = 960;
 var maxH = 600, borderWidth = 1;;
 
-var datasetTransfers = null;
+var datasetAllTransfers = null;
 
 var globalSortVar = "to";
+
+var winW = window.innerWidth;
+
+var premClubs=['Arsenal','Aston Villa','Burnley','Chelsea','Crystal Palace','Everton','Hull City','Leicester City','Liverpool','Manchester City','Manchester United','Newcastle United','QPR','Stoke City','Southampton','Sunderland','Swansea City','Tottenham Hotspur','West Bromwich Albion','West Ham United'];
 
 export function init(el, context, config, mediator) {
     iframeMessenger.enableAutoResize();
@@ -47,160 +51,477 @@ export function init(el, context, config, mediator) {
 
 
 function modelData(r){
-    datasetTransfers = r.sheets.Data;
-    console.log(r);
+    datasetAllTransfers = r.sheets.Data;
 
-    treeJson = buildTreeJson();
+    //parseData = buildTreeJson(datasetAllTransfers);
 
-    buildTreeMap();
+    modelDataClubArrays(r)
 
     addListeners();
 
 }
 
-function buildTreeJson() {
 
-        var root = {}, i, val, totalVal = 0;
 
-        root.name = "Transfer window spending";
-        root.children = [];
+function modelDataClubArrays(data){
+ 
+        var tempArr = []; 
+        var tempArrTwo = [];
+        var tempArrThree = [];
+       
+
+
+        // Store in global var
+        dataset = data.sheets.Data;
+        starData = data.sheets.Star_Men;
+
+         _.each(premClubs, function(one){
+              _.each(dataset, function(two){
+                  if(one === two.to){
+                      one = two.to;  
+                      tempArr.push (two);           
+                  }           
+              });
+          });
+
+         dataset = tempArr;
+
+
+
+          _.each(dataset, function(three){
+               var ageGroup = getAgeGroup(three);
+               var newObj = three;
+               newObj["age-group"] = ageGroup;
+
+               tempArrTwo.push(newObj);
+               
+          });
+
+        dataset = tempArrTwo;
+
+      leaguesArray = getUniqueObjects("previousleague");
+      leaguesArray = getZeroValueObjects(leaguesArray, "previousleague");
+
+      nationalitiesArray = getUniqueObjects("nationality");
+      nationalitiesArray = getZeroValueObjects(nationalitiesArray, "nationality");
+
+
+      //console.log(nationalitiesArray);
 
         
-        // _.each(datasetTransfers, function(item, i){
-        //     console.log(item)
-        // })
+        _.each(dataset, function(four){
 
+               var newObj = four;
 
+               var newNationality = checkForZeroValuesTwo(four.nationality);
+               var newPreviousLeague = checkForZeroValues(four.previousleague);
 
-        for( i = 0; i < datasetTransfers.length; i++) {
-            val = getVal(datasetTransfers[i]["Price"]);
-            datasetTransfers[i].size = val;
-            datasetTransfers[i].mySize = val;
-            datasetTransfers[i].index = i;
-            datasetTransfers[i].name = datasetTransfers[i]["Title"]
-            datasetTransfers[i].children = null;
-            datasetTransfers[i].percentCut = 0;
-            root.children.push(datasetTransfers[i]);
-            totalVal += val;
-        }
-        
-        
-        val = 200;
-        datasetTransfers.push({})
-            datasetTransfers[i].size = val;
-            datasetTransfers[i].mySize = val;
-            datasetTransfers[i].index = i;
-            datasetTransfers[i].name = "My cuts";
-            datasetTransfers[i].children = null;
-            datasetTransfers[i].percentCut = 0;
-            root.children.push(datasetTransfers[i]);
-            totalVal += val;
-            colorsArr[i] = "#aa0000";
-        root.size = totalVal;
-        
-        myCutsIndex = i;
-        
-        _.each(datasetTransfers, function(item, i){
-            console.log(item)
-        })
-        
-        return root;
-        
-    }
+               var nationalityCount = getCountE("nationality",four.nationality)
 
-function buildTreeMap() {
+               var previousCount = getCountE("previousleague",four.previousleague)
 
-    var w = globalW;
-    var h = maxH;
+               newObj["displayNationality"] = four.nationality;
+               newObj["displayPreviousLeague"] = four.previousleague;
+               newObj["nationality"] = checkCategory("nationality",four.nationality,nationalityCount);
+               newObj["previousleague"] = checkCategory("previousLeague",four.previousleague,previousCount);
+               newObj["nationalityCount"] = nationalityCount;
+               newObj["previousLeagueCount"] = previousCount;
 
-        var treemap = d3.layout.treemap().size([w, h]).sticky(true).value(function(d) {
-            if (myView) {
-            return d.mySize;
-            } else {
-            return d.size;
-            }
+              // newObj["nationalityCount"] = nationalityCount;
+               tempArrThree.push(newObj);
+              
+          });
+
+      dataset = tempArrThree;
+      
+      addListeners();
+
+      filterTreeMap(globalSortVar);
+}
+
+function getUniqueObjects(strIn){
+
+  var tempArr = [];
+
+       var leaguesArrayTemp = _.countBy(dataset, function(obj){
+              
+                  var newObj = {};
+                  newObj[strIn] = obj[strIn];
+                  newObj["price"] = getVal(obj.price);
+                  tempArr.push(newObj);  
+
+                  
         });
 
-        treemap.sort(comparator);
-        
-        console.log(datasetTransfers[myCutsIndex].name);
-        
+   return tempArr;
+}
 
-        function comparator(a, b) {
-            return a.value - b.value;
-        }
 
-        var div = d3.select("#treemapView").append("div").style("position", "relative").style("width", w + "px").style("height", h + "px");
-        
-        
-        
-        
-        var root = treeJson;
+function getCountE(valToCheck,checkStr){
 
-        div.data([root]).selectAll("div").data(treemap.nodes).enter().append("div").attr("class", function(d) {
-            if(d.depth > 1 || d.depth == 0) {
+      var valueOut = 0;
+     // console.log(nationalitiesArray)
 
-                return "cell hide";
-            } else {
-                return "cell show";
-            }
-        }).attr("id", function(d) {
+      
 
-            return "cell_" + d.index;
+      for(var k=0; k < dataset.length; k++){
+          if (checkStr == dataset[k][valToCheck]){
+                 valueOut++
+          }
+      }
 
-        }).style("background", function(d) {
-            //console.log(colors[d.index])
-            return colorsArr[d.index] ? colorsArr[d.index] : "#a9a9a9";
-        }).html(function(d) {
+     return valueOut;
 
-            return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellValue'>" + d.value + "bn</span><br /><span class='cellLabel'>" + d.name + "</span></div>";
+}
 
-        })//return d.children ? color(d.name) : null;
-        .call(cell).on("click", function(d) {  currentDepartment = d.index;  zoomToDepartment(d); });
-        
-        datasetTransfers[myCutsIndex].size = 0;
-        datasetTransfers[myCutsIndex].mySize = 0;
-        
-        div.selectAll(".cell").data(treemap.value(function(d) { return d.size; })).call(cell);
+function checkCategory(s,str,n){
+  
+
+    if(n < 3 && s == "nationality"){str = "Other countries"};
+    if(n < 3 && s == "previousLeague"){str = "Other leagues"};
+
+  return str;
+}
+
+function getZeroValueObjects(arrIn, sortStr){
+// check for zero values in previous leagues and nationalitites - theses will be bundled to OTHERS
+        var tempArr = [];
+        var names = _.pluck(arrIn, sortStr);
             
-            //$(".cellCutBlock").hide();
+        var result = _.uniq(names);//, values
+        var uniqleaguesArray = result;
 
-            document.getElementsByClassName('cellCutBlock')[0].style.visibility='hidden';
+
+             _.each(uniqleaguesArray, function(one){
+
+                    var newObj = {}
+                    var tempNum = 0
+
+
+                  _.each(arrIn, function(two){
+
+                    if(one === two[sortStr]){
+
+                          tempNum = tempNum + getVal(two.price);
+                          newObj[sortStr]= two[sortStr];
+                          newObj["price"] = tempNum;
+
+                          //console.log("MATCH "+tempNum)
+                        }   
+                   
+                              
+                  });
+
+                  tempArr.push (newObj);
+              }); 
+
+         return tempArr;
+
 }
 
 
-function cell() {
+function getAgeGroup(objIn){
 
-    this.style("left", function(d) {
-        return d.x + "px";
-    }).style("top", function(d) {
-        return d.y + "px";
-    }).style("width", function(d) {
-        return Math.max(0, d.dx - borderWidth) + "px";
-    }).style("height", function(d) {
-        return Math.max(0, d.dy - borderWidth) + "px";
-    }).style("display", function(d) {
-        if(d.depth <= 1 && d.depth != 0) {
-            return "block";
-        } else {
-            return "none";
-        }
+      var ageGroup;
+
+      var ageIn = parseInt(objIn.Age);
+
+         if (ageIn < 20){
+            ageGroup = "Under 20 years old"
+         }
+
+         else if(ageIn >= 20 && ageIn <= 25){
+            ageGroup = "20-25 years old"
+         }
+          
+         else if(ageIn >= 26 && ageIn <= 30){
+            ageGroup = "25-30 years old"
+         } 
+
+         if (ageIn > 30){
+            ageGroup = "Over 30 years old"
+         }
+
+      return ageGroup;
+
+}
+
+function checkForZeroValues(checkStr){
+
+      var valueOut;
+     // console.log(nationalitiesArray)
+
+      for(var i=0; i < leaguesArray.length; i++){
+          if (checkStr == leaguesArray[i]["previousleague"]){
+                  leaguesArray[i]["price"] == 0 ? valueOut = "Other leagues" : valueOut = checkStr;
+                  return valueOut;
+          }
+      }
+
+    
+
+     
+
+}
+
+
+function checkForZeroValuesTwo(checkStr){
+
+      var valueOut;
+     // console.log(nationalitiesArray)
+
+      
+
+      for(var k=0; k < nationalitiesArray.length; k++){
+          if (checkStr == nationalitiesArray[k].nationality){
+                  
+                  nationalitiesArray[k]["price"] == 0 ? valueOut = "Other nationalities" : valueOut = checkStr;
+                 // console.log ("MATCHED NATION "+checkStr +"  returning "+valueOut+"   "+nationalitiesArray[k]["price"]);
+                  return valueOut;
+          }
+      }
+
+     
+
+}
+
+///END DATA MODEL
+
+
+function buildTreeJson(a) {
+        
+        var root = {}, i, val, totalVal = 0;
+
+        root.name = globalSortVar;
+        root.children = [];
+
+        _.each(a, function(item,i){
+         
+            val = getVal(item.Price);
+            val = Number(val);
+            val = val + 1000000;
+            item.mySize = val;
+            item.index = i;
+            item.children = null;
+
+            root.children.push(item);
+            totalVal += val;
+        })        
+        
+        root.size = totalVal;
+        console.log(root)
+        return root;
+        
+}
+
+function buildTreeMap(dataIn){
+
+    console.log(dataIn)
+
+    var htmlStr = "";
+
+    _.each(dataIn.children, function(obj){
+            obj.treeMapArea < 2800000 ? obj.treeMapArea = 3000000 : obj.treeMapArea = (obj.treeMapArea+2800000);
+
+            //obj.treeMapArea += 60000000;
+        });
+
+    var w = 960;
+    var h= 600;
+    var div, treeMap, root, node, nodes, cell;
+
+
+     _.sortBy(dataIn.children, function(num){ return dataIn.children.value; });      
+        //positionDetailView();
+              treeMap = d3.layout.treemap()
+                .size([w, h])
+                .sticky(false)
+                .ratio('3')
+                .mode("dice")
+
+                .sort(function comparator(a, b) {
+                    if(a.name == "Other leagues"){
+                      a.totalCost = 0
+                    }
+
+                    if(a.name == "Other countries"){
+                      a.totalCost = 0
+                    }
+
+                  return a.totalCost - b.totalCost;
+                })
+
+                .round(true)
+                .value(function(d) { return d.size });
+
+
+              div = d3.select("#treemapView").append("div")
+
+                .style("position", "relative")
+                .style("width", w + "px")
+                .style("height", h+"px")
+                .style("opacity",1);
+
+                //div.transition().style("height", h+"px").duration(500);
+          
+                root = dataIn;
+                node = root = dataIn;
+                nodes = treeMap.nodes(root)
+                
+            .filter(function(d) { return !d.children; });
+
+                  div.data([root]).selectAll("div").data(treeMap.nodes).enter().append("div").attr("class", function(d) {
+                            console.log(d)
+                            if(d.depth > 1 || d.depth == 0) {
+                                return "cell hide";
+                                
+                            } else {
+                                return "cell show";
+                            }
+                  })
+
+              .attr("id", function(d) { return "cell_" + d.index; })
+              .style("background", function(d) { console.log(d); return d.tintColor; })
+
+              .html(function(d) {
+
+
+                if(d.name=="Other leagues" || d.name=="Other countries"){
+                  var cellStr = getPostionStringTreemap(d.name);
+
+                }else{
+                  var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
+                }
+
+                console.log(cellStr)
+                return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
+                })//return d.children ? color(d.name) : null;
+              
+
+              .call(cell).on("click", function(d) {  
+                zoomToDetailView(d, this); 
+                //gotoPosition = $(this).offset().top;
+                iframeMessenger.getPositionInformation(scrollPage);
+              });
+              
+              div.selectAll(".cell").data(treeMap.value(function(d) {  return d.treeMapArea; })).call(cell);
+                
+        //  $(".cellCutBlock").hide();
+
+}
+
+
+function getPostionStringTreemap(strIn){
+
+  var strOut;
+
+  switch(strIn) {
+    case "G":
+      strOut= "Goalkeeper"
+      break;
+    case "D":
+      strOut= "Defender"
+      break;
+    case "M":
+      strOut= "Midfielder"
+      break;
+    case "F":
+      strOut= "Forward"
+      break;
+     default:
+     strOut= strIn
+    } 
+
+    return strOut;       
+
+}
+
+
+function myRound(num,decimals) {
+    var sign="£";
+    num = (num/1000000)
+    var newNum = num.toFixed(1);
+    num = (newNum*1)+0;
+    return sign +(num);
+}
+
+
+function position() {
+  this.style("left", function(d) { return d.x + "px"; })
+      .style("top", function(d) { return d.y + "px"; })
+      .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+      .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+}
+
+
+
+function filterArr(str){
+
+    var a = getCountByProperty(datasetAllTransfers, str);
+
+    a = buildTreeJson(a)
+
+    console.log(a)
+
+    buildTreeMap(a)
+}
+
+
+
+function addListeners(){
+    document.getElementById("filterDropdown").addEventListener("change", updateFromFilter);
+}
+
+function updateFromFilter(){
+    var x = document.getElementById("filterDropdown").value;
+    filterTreeMap(x);
+}
+
+function getCountByProperty(dataset, property) {
+    var totalPrice, totalSize = 0;
+
+     var a = _.groupBy(dataset, function(player) {
+        return player[property];
     });
+
+
+     var a2 = _.each(a, function(item){
+                    var tempCost = 0;
+                        _.each(item, function(obj){
+                            
+                            tempCost+=(getVal(obj["Price"]))
+
+                        })  
+                        item.Price = tempCost;
+                        item.size = tempCost;
+        })
+     
+     return a2;
 }
+
+
+function getVal(n){
+    var checkNum = (isNaN(n))
+        if (checkNum){
+            n = 0;
+        } 
+
+    n = Number(n);       
+    return n;
+}
+
 
 function filterTreeMap(varIn){
 
   globalSortVar=varIn;
 
-    //$("#detail-view").hide();  
+     var playerCount = getCountByProperty(dataset, varIn);
 
-     var playerCount = getCountByProperty(datasetTransfers, varIn);
-
-     playerCountArray = _.map(playerCount, function(val, key, list) {
-                                var num = _.reduce(val, function(memo, player) {
-                                var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);
-                                return memo + cost;
-                            }, 0);
+           playerCountArray = _.map(playerCount, function(val, key, list) {
+                var num = _.reduce(val, function(memo, player) {
+                  var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);
+                  return memo + cost;
+                }, 0);
 
 
                 if (varIn=="Total spending"){
@@ -211,8 +532,6 @@ function filterTreeMap(varIn){
                               
                               };
                 }else{
-
-                    console.log(val, key, list)
                       return {
                                 name: key,
                                 totalCost: num,
@@ -224,56 +543,25 @@ function filterTreeMap(varIn){
                 
 
             });
- 
+
+
+           
         rootJSON = buildTreeJson(playerCountArray);
-
-        document.getElementById("treemapView").innerHTML = "";
         
-      //  buildTreeMap(rootJSON);
+        buildTreeMap(rootJSON);
 
-    //checkWinSize(winW);
+        checkWinSize(winW);
 }
 
-function addListeners(){
-    document.getElementById("filterDropdown").addEventListener("change", updateFromFilter);
-}
-
-function updateFromFilter(){
-    var x = document.getElementById("filterDropdown").value;
-    filterTreeMap(x);
-
-}
-
-function getCountByProperty(dataset, property) {
-    return _.groupBy(dataset, function(player) {
-      return player[property];
-    });
-}
-
-
-function getVal(n){
-    var checkNum = (isNaN(n))
-        if (checkNum){
-            n = 0;
-        }     
-    return n;
-}
-
-
-// $(window).resize(function() {
-    
-//   setTimeout(checkWinSize, 1000)
-
-// });
 
 
 function checkWinSize(wideNumIn){
 
     var wideNumIn = w;
-
-    w = document.getElementById("treemapView").outerWidth();
+    var w = document.getElementById("treemapContainer").offsetWidth;
+    
     if(wideNumIn <= 899){
-      h = (w/6)*18;
+      h = (w/6)*12;
     }
     if(wideNumIn > 899)
 
@@ -283,13 +571,24 @@ function checkWinSize(wideNumIn){
 
 
 
-  rootJSON = buildTreeJson(playerCountArray);
-    document.getElementById("treemapView").innerHTML = "";
-    //.css({height: "auto"});
+    rootJSON = buildTreeJson(playerCountArray);
+    document.getElementById("treemapView").innerHTML = "<div></div>";
+    
     buildTreeMap(rootJSON);
 
-    //$("#detail-view").hide();
-    //$('#treemapView').css('height', 'auto');
+    
 
 }
+
+
+
+
+// $(window).resize(function() {
+    
+//   setTimeout(checkWinSize, 1000)
+
+// });
+
+
+
 
