@@ -584,7 +584,7 @@ function zoomToDetailView(d, currClip) {
   
   document.getElementById("detailView").style.display="block";
 
-  console.log(d, currClip)
+
 
 
  
@@ -594,7 +594,7 @@ function zoomToDetailView(d, currClip) {
   // var newLeft = offset.left;
   var newArr = getDetailArray(d.name, globalSortVar);
 
-  setDetailView(newArr, globalSortVar, d);
+  setDetailView(newArr, globalSortVar, d, currClip);
 
 
 
@@ -698,7 +698,7 @@ function getPostionString(strIn){
 
 }
 
-function setDetailView(arrIn,strIn,d){
+function setDetailView(arrIn,strIn,d, c){
     var starPlayerInfo = getStarMan(d);
     var htmlStrR = "";
     var htmlStrC = "";
@@ -777,7 +777,7 @@ function setDetailView(arrIn,strIn,d){
         // 
 
 
-       //$("#center-panel").html(htmlStrC);
+      
         document.getElementById("centerPanel").innerHTML = htmlStrR;
 
         if(arrIn[0][strIn]=="Other leagues" || arrIn[0][strIn]=="Other countries"){
@@ -787,12 +787,20 @@ function setDetailView(arrIn,strIn,d){
         }
         
         
+        positionDetailView(c);
+      
 
-        //<div class='number-caption'>PLAYERS SOLD</div><div class='large-number-left'>"+myRound(totalFees, 2 )+"m</div>
-        //var position = $("#treemap-view").position();
+}
 
-        //$('#back-to-top').on('click', function(){ gotoPosition=0; iframeMessenger.getPositionInformation(scrollPage) });
+function positionDetailView(c){
+      var d= document.getElementById("detailView");
 
+      var t = c.offsetTop;
+      var ch = c.offsetHeight;
+      var dh = c.offsetHeight;
+
+      d.style.top = t+ch+"px";
+     // c.style.height = ch+dh+36+"px";
 }
 
 

@@ -1,5 +1,11 @@
 $highlight-color: map-get($pasteup-palette, 'news-main-1');
 
+.gv-detail-view{
+  position:absolute;
+  width:100%;
+  background:#FFF;
+}
+
 .gv-holder-div {
     position: relative;
     width: 100%;

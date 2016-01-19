@@ -3,6 +3,15 @@ figure.interactive {
     margin: 0;
     padding: 0;
     background-color: #dcdcdc;
+    font-family: "Guardian Text Egyptian Web";
+    color:#767676;
+    font-size:18px;
+    line-height:1.25em;
+
+    h1,h2,h3,h4,h5,h6{
+        font-family: "Guardian Egyptian Web";
+        color:#333;
+    }
 }
 
 // Link styles don't exist on the app
