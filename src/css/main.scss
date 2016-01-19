@@ -1,6 +1,30 @@
+@import 'bower_components/pasteup-palette/src/_palette';
+@import "bower_components/guss-colours/_colours.scss";
+
+
+@include guss-generate-colour-classes($palette: $pasteup-palette, $property: background-color, $prefix: b-);
+
+$neutral-1: map-get($pasteup-palette, 'neutral-1');
+$neutral-2: map-get($pasteup-palette, 'neutral-2');
+$neutral-3: map-get($pasteup-palette, 'neutral-3');
+$neutral-4: map-get($pasteup-palette, 'neutral-4');
+$neutral-5: map-get($pasteup-palette, 'neutral-5');
+$neutral-6: map-get($pasteup-palette, 'neutral-6');
+$neutral-7: map-get($pasteup-palette, 'neutral-7');
+$neutral-8: map-get($pasteup-palette, 'neutral-8');
+$news-main-1: map-get($pasteup-palette, 'news-main-1');
+$news-main-2: map-get($pasteup-palette, 'news-main-2');
+$guardian-brand: map-get($pasteup-palette, 'guardian-brand');
+$guardian-brand-light: map-get($pasteup-palette, 'guardian-brand-light');
+$guardian-brand-dark: map-get($pasteup-palette, 'guardian-brand-dark');
+
+
 @import "fonts";
 @import "palette";
 @import "mq";
+@import "layout";
+@import "layout-custom";
+@import "graph";
 @import "general";
 @import "share";
 @import "dropdown";

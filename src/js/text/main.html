@@ -1,60 +1,274 @@
-<div class="interactive-container">
-    <h2 class="interactive-es6-headline">Interactive bootstrap</h2>
-
-    <div class="test-msg">Loading…</div>
-
-
+<div class="interactive-container" id="interactiveContainer">
     
 
-    <div class="gv-dropdown">
-                <div class="styled-select">
-                    <select class="gv-select" id="filterDropdown"> 
-                        <option value="to">Club</option>
-                          <option value="age-group">Age range</option>
-                          <option value="nationality">Country</option>
-                          <option value="previousleague">Previous league</option>
-                          <option value="position">Position</option>
-                          <option value="Total spending">Total spending</option>
-                    </select>
-                </div>
+    <div class="test-msg" id="LoadingMsg">Loading…</div>
 
 
-                <div id="filter-label">
-                    Showing:
-                </div>
+     <div class="gv-row ">
+            <div class="gv-flex gv- ">
+                <h3>Top buys</h3>
+            </div>
+            <div class="gv-layout-flex">
+                 <div class="gv-flex-2 gv- ">                             
+                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta</p>
+                </div>          
+            </div>         
     </div>
+
+    <div class="gv-row ">
+        <div class="gv-flex gv- ">            
+                
+                    
+        </div>
+        <div class="gv-layout-flex" id="topBuyContent">
+
             
 
-    <div class="treemapContainer">
-            <div id="treemapView">
-
-
-              </div>
-
-              <div id="detail-view">
-
-              <div class='detail_header'></div> 
-              
-              <div id="left-panel" class="column">
-                
-            <div id='detail_view_totalfee'></div>
-
-                
-              </div>
-               
-              <div id="center-panel" class="column">
-              
-               
-              </div> 
-
-             
-              <div id="back-button">close </div>
-
-
-
-            </div> 
-          
+        </div>
     </div>    
+
+
+
+
+
+
+     <div class="gv-row ">
+            <div class="gv-flex gv- ">
+                <h3>Graph feature</h3>
+            </div>
+            <div class="gv-layout-flex">
+                 <div class="gv-flex-2 gv- ">                             
+                    <p>Five biggest spenders and five biggest sellers or compare previous transfer window topline figures</p>
+                </div>          
+            </div>         
+    </div>
+
+    <div class="gv-row ">
+        <div class="gv-flex gv- ">            
+                
+                    
+        </div>
+        <div class="gv-layout-flex" id="graphContent">
+            
+        <div class="gv-holder-div"> 
+            <div class="gv-graph-axis"><span class="timeline__one" style="left: 0%; width: 16.666666666666668%">Spending £millions</span> <span class="timeline__label" style="left: 28.57%">20</span> <span class="timeline__label" style="left: 42.86%">30</span> <span class="timeline__label" style="left: 57.15%">40</span> <span class="timeline__label" style="left: 71.42%">50</span> <span class="timeline__label" style="left: 85.71%">60</span> <span class="timeline__label gv-hide-mobile" style="left: 100%">70</span></div>
+                <table class="bars-data-table" id="topFiveTable">
+        <tbody>
+        <tr class="spaceAbove">
+            <td>Arsenal
+                <br><span class="gv-definition-text">Balance: +£10m</span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 65.99142857142857%;"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 97.99142857142857%;"></div>
+            </td>
+        </tr>
+        
+        <tr class="spaceAbove">
+            <td>Aston Villa
+                <br><span class="gv-definition-text">-£2m</span>
+            </td>
+        </tr> 
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 97.99142857142857%;"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 65.99142857142857%; background:#194377 !important;"></div>
+            </td>
+        </tr>
+        
+       
+        
+        
+        <tr class="spaceAbove">
+            <td>Bournemouth
+                <br><span class="gv-definition-text">-£12m</span>
+            </td>
+        </tr> 
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 75%;"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 35%; background:#194377 !important;"></div>
+            </td>
+        </tr>
+        
+        
+         <tr class="spaceAbove">
+            <td>Chelsea
+                <br><span class="gv-definition-text">+£12m</span>
+            </td>
+        </tr> 
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 75%;"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 0.1%; background:#194377 !important;"></div>
+            </td>
+        </tr>
+        
+        
+        <tr class="spaceAbove">
+            <td>Crystal Palace
+                <br><span class="gv-definition-text">+£4m</span>
+            </td>
+        </tr> 
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 35%;"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 0.1%; background:#194377 !important;"></div>
+            </td>
+        </tr>
+        
+        
+        
+         <tr class="spaceAbove">
+            <td>Everton
+                <br><span class="gv-definition-text">-£14m</span>
+            </td>
+        </tr> 
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 65%;"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>
+                <div class="bars-data-bar plague-bar" style="width: 5%; background:#194377 !important;"></div>
+            </td>
+        </tr>
+        
+        
+        
+         
+        
+    </tbody>
+</table>
+</div>
+        </div>        
+    </div>    
+
+
+    <div class="gv-row ">
+            <div class="gv-flex gv- ">
+                <h3>Explore the data</h3>
+            </div>
+            <div class="gv-layout-flex">
+                 <div class="gv-flex-2 gv- " id="infographicContent">                             
+                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta</p>
+                </div>          
+            </div>         
+    </div>
+    
+
+
+    <div class="gv-row ">
+                    
+                
+                    
+        <div class="gv-flex gv- ">
+                
+                    
+                
+                
+        </div>
+        <div class="gv-layout-flex">
+            <div class="gv-flex-4 gv- ">
+                <div class="gv-holder-div"> 
+                            <div class="gv-dropdown">
+                                            <div class="styled-select">
+                                                <select class="gv-select" id="filterDropdown"> 
+                                                    <option value="to">Club</option>
+                                                      <option value="age-group">Age range</option>
+                                                      <option value="nationality">Country</option>
+                                                      <option value="previousleague">Previous league</option>
+                                                      <option value="position">Position</option>
+                                                      <option value="Total spending">Total spending</option>
+                                                </select>
+                                            </div>
+                                            <div id="filter-label">
+                                                Showing:
+                                            </div>
+                                </div>
+                                
+
+                                <div class="treemapContainer">
+                                        <div id="treemapView">
+
+
+                                          </div>
+
+                                          <div id="detail-view">
+
+                                          <div class='detail_header'></div> 
+                                          
+                                          <div id="left-panel" class="column">
+                                            
+                                        <div id='detail_view_totalfee'></div>
+
+                                            
+                                          </div>
+                                           
+                                          <div id="center-panel" class="column">
+                                          
+                                           
+                                          </div> 
+
+                                         
+                                          <div id="back-button">close </div>
+
+
+
+                                        </div> 
+                                      
+                                </div> 
+
+                    <!-- <div class="gv-iframe" data-asset-type="iframe" data-url="http://interactive.guim.co.uk/uploader/embed/2015/09/archive-9-zip/giv-31114zRFKq1RnwWPQ/">
+                        <iframe height="564" src="http://interactive.guim.co.uk/uploader/embed/2015/09/archive-9-zip/giv-31114zRFKq1RnwWPQ/" style="width: 100%; border: none;">
+                        </iframe>
+                    </div>  -->  
+
+                    </div>               
+            </div>          
+        </div>
+                
+                
+                
+                
+    </div>
+
+       
 
     <!-- <ul class="fonts">
         <li class="fonts__egyptian">Egyptian</li>
@@ -62,10 +276,6 @@
         <li class="fonts__sans">Sans</li>
         <li class="fonts__text-sans">Text Sans</li>
     </ul> -->
-    <p>
-        <button class="interactive-share" data-network="facebook"></button>
-        <button class="interactive-share" data-network="twitter"></button>
-        <button class="interactive-share" data-network="email"></button>
-    </p>
-    <img src="%assetPath%/assets/imgs/test.png" />
+  
+ 
 </div>

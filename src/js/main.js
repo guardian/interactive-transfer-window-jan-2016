@@ -26,9 +26,13 @@ var datasetAllTransfers = null;
 
 var globalSortVar = "to";
 
-var winW = window.innerWidth;
+
+
+var winW;
 
 var premClubs=['Arsenal','Aston Villa','Burnley','Chelsea','Crystal Palace','Everton','Hull City','Leicester City','Liverpool','Manchester City','Manchester United','Newcastle United','QPR','Stoke City','Southampton','Sunderland','Swansea City','Tottenham Hotspur','West Bromwich Albion','West Ham United'];
+
+
 
 export function init(el, context, config, mediator) {
     iframeMessenger.enableAutoResize();
@@ -50,30 +54,22 @@ export function init(el, context, config, mediator) {
 }
 
 
+
 function modelData(r){
-    datasetAllTransfers = r.sheets.Data;
 
-    //parseData = buildTreeJson(datasetAllTransfers);
-
-    modelDataClubArrays(r)
-
-    addListeners();
-
-}
-
-
-
-function modelDataClubArrays(data){
- 
         var tempArr = []; 
         var tempArrTwo = [];
         var tempArrThree = [];
-       
-
 
         // Store in global var
-        dataset = data.sheets.Data;
-        starData = data.sheets.Star_Men;
+        dataset = r.sheets.Data;
+        starData = r.sheets.Star_Men;
+
+        var topBuyArr = filterArray(starData,"topbuy","y");
+
+        var sellArr = filterArray(dataset,"previousleague","Premier League (England)");
+
+        console.log(sellArr)
 
          _.each(premClubs, function(one){
               _.each(dataset, function(two){
@@ -86,8 +82,6 @@ function modelDataClubArrays(data){
 
          dataset = tempArr;
 
-
-
           _.each(dataset, function(three){
                var ageGroup = getAgeGroup(three);
                var newObj = three;
@@ -97,7 +91,7 @@ function modelDataClubArrays(data){
                
           });
 
-        dataset = tempArrTwo;
+      dataset = tempArrTwo;
 
       leaguesArray = getUniqueObjects("previousleague");
       leaguesArray = getZeroValueObjects(leaguesArray, "previousleague");
@@ -134,450 +128,160 @@ function modelDataClubArrays(data){
 
       dataset = tempArrThree;
       
-      addListeners();
+      addListeners(); 
 
-      filterTreeMap(globalSortVar);
+      buildTopBuyView(topBuyArr);
+
+}
+
+
+function filterArray(a,q,v){
+    var tempArr = [];
+          _.each(a, function(item,i){
+              if(item[q]===v){
+                  tempArr.push(item);
+               }
+          })
+    return tempArr
+}
+
+
+function getAgeGroup(objIn){
+      var ageGroup;
+      var ageIn = parseInt(objIn.age);
+         if (ageIn < 20){ ageGroup = "19 years old and younger" }
+         else if(ageIn >= 19 && ageIn <= 25){ ageGroup = "20-25 years old" }  
+         else if(ageIn >= 26 && ageIn <= 30){ ageGroup = "26-30 years old" } 
+         if (ageIn > 30){ ageGroup = "31 years old and over" }
+      return ageGroup;
 }
 
 function getUniqueObjects(strIn){
 
   var tempArr = [];
+  var tempStr = "";
+  var tempCount;
 
-       var leaguesArrayTemp = _.countBy(dataset, function(obj){
+  var datasetSorted = _.sortBy(dataset, strIn);
+
+       var leaguesArray = _.countBy(dataset, function(obj){
               
                   var newObj = {};
                   newObj[strIn] = obj[strIn];
-                  newObj["price"] = getVal(obj.price);
+                  newObj["price"] = checkForNumber(obj.price);
+                  newObj["counter"] = tempCount;
                   tempArr.push(newObj);  
-
-                  
+              
         });
 
    return tempArr;
 }
 
 
-function getCountE(valToCheck,checkStr){
-
-      var valueOut = 0;
-     // console.log(nationalitiesArray)
-
-      
-
-      for(var k=0; k < dataset.length; k++){
-          if (checkStr == dataset[k][valToCheck]){
-                 valueOut++
-          }
-      }
-
-     return valueOut;
-
+function checkForNumber(numIn){
+    isNaN(numIn) ? numIn = 0 : numIn = numIn;
+    numIn = Number(numIn);
+    return numIn;
 }
 
-function checkCategory(s,str,n){
-  
-
-    if(n < 3 && s == "nationality"){str = "Other countries"};
-    if(n < 3 && s == "previousLeague"){str = "Other leagues"};
-
-  return str;
-}
 
 function getZeroValueObjects(arrIn, sortStr){
 // check for zero values in previous leagues and nationalitites - theses will be bundled to OTHERS
         var tempArr = [];
-        var names = _.pluck(arrIn, sortStr);
-            
+        var names = _.pluck(arrIn, sortStr);    
         var result = _.uniq(names);//, values
         var uniqleaguesArray = result;
 
-
-             _.each(uniqleaguesArray, function(one){
-
+          _.each(uniqleaguesArray, function(one){
                     var newObj = {}
                     var tempNum = 0
 
-
                   _.each(arrIn, function(two){
+                        if(one === two[sortStr]){
 
-                    if(one === two[sortStr]){
+                              tempNum = tempNum + checkForNumber(two.price);
+                              newObj[sortStr]= two[sortStr];
+                              newObj["price"] = tempNum;
 
-                          tempNum = tempNum + getVal(two.price);
-                          newObj[sortStr]= two[sortStr];
-                          newObj["price"] = tempNum;
-
-                          //console.log("MATCH "+tempNum)
-                        }   
-                   
-                              
-                  });
-
+                              //console.log("MATCH "+tempNum)
+                            }           
+                    });
                   tempArr.push (newObj);
               }); 
-
          return tempArr;
-
-}
-
-
-function getAgeGroup(objIn){
-
-      var ageGroup;
-
-      var ageIn = parseInt(objIn.Age);
-
-         if (ageIn < 20){
-            ageGroup = "Under 20 years old"
-         }
-
-         else if(ageIn >= 20 && ageIn <= 25){
-            ageGroup = "20-25 years old"
-         }
-          
-         else if(ageIn >= 26 && ageIn <= 30){
-            ageGroup = "25-30 years old"
-         } 
-
-         if (ageIn > 30){
-            ageGroup = "Over 30 years old"
-         }
-
-      return ageGroup;
-
 }
 
 function checkForZeroValues(checkStr){
-
       var valueOut;
-     // console.log(nationalitiesArray)
-
-      for(var i=0; i < leaguesArray.length; i++){
-          if (checkStr == leaguesArray[i]["previousleague"]){
-                  leaguesArray[i]["price"] == 0 ? valueOut = "Other leagues" : valueOut = checkStr;
-                  return valueOut;
-          }
-      }
-
-    
-
-     
-
+          for(var i=0; i < leaguesArray.length; i++){
+              if (checkStr == leaguesArray[i]["previousleague"]){
+                      leaguesArray[i]["price"] == 0 ? valueOut = "Other leagues" : valueOut = checkStr;
+              return valueOut;
+              }
+          }  
 }
-
 
 function checkForZeroValuesTwo(checkStr){
-
       var valueOut;
-     // console.log(nationalitiesArray)
-
-      
-
-      for(var k=0; k < nationalitiesArray.length; k++){
-          if (checkStr == nationalitiesArray[k].nationality){
-                  
-                  nationalitiesArray[k]["price"] == 0 ? valueOut = "Other nationalities" : valueOut = checkStr;
-                 // console.log ("MATCHED NATION "+checkStr +"  returning "+valueOut+"   "+nationalitiesArray[k]["price"]);
-                  return valueOut;
+          for(var k=0; k < nationalitiesArray.length; k++){
+              if (checkStr == nationalitiesArray[k].nationality){
+                      nationalitiesArray[k]["price"] == 0 ? valueOut = "Other Countries" : valueOut = checkStr;
+                      return valueOut;
+              }
           }
-      }
-
-     
-
 }
 
-///END DATA MODEL
-
-
-function buildTreeJson(a) {
-        
-        var root = {}, i, val, totalVal = 0;
-
-        root.name = globalSortVar;
-        root.children = [];
-
-        _.each(a, function(item,i){
-         
-            val = getVal(item.Price);
-            val = Number(val);
-            val = val + 1000000;
-            item.mySize = val;
-            item.index = i;
-            item.children = null;
-
-            root.children.push(item);
-            totalVal += val;
-        })        
-        
-        root.size = totalVal;
-        console.log(root)
-        return root;
-        
+function getCountE(valToCheck,checkStr){
+      var valueOut = 0;
+          for(var k=0; k < dataset.length; k++){
+              if (checkStr == dataset[k][valToCheck]){
+                     valueOut++
+              }
+          }
+     return valueOut;
 }
 
-function buildTreeMap(dataIn){
-
-    console.log(dataIn)
-
-    var htmlStr = "";
-
-    _.each(dataIn.children, function(obj){
-            obj.treeMapArea < 2800000 ? obj.treeMapArea = 3000000 : obj.treeMapArea = (obj.treeMapArea+2800000);
-
-            //obj.treeMapArea += 60000000;
-        });
-
-    var w = 960;
-    var h= 600;
-    var div, treeMap, root, node, nodes, cell;
-
-
-     _.sortBy(dataIn.children, function(num){ return dataIn.children.value; });      
-        //positionDetailView();
-              treeMap = d3.layout.treemap()
-                .size([w, h])
-                .sticky(false)
-                .ratio('3')
-                .mode("dice")
-
-                .sort(function comparator(a, b) {
-                    if(a.name == "Other leagues"){
-                      a.totalCost = 0
-                    }
-
-                    if(a.name == "Other countries"){
-                      a.totalCost = 0
-                    }
-
-                  return a.totalCost - b.totalCost;
-                })
-
-                .round(true)
-                .value(function(d) { return d.size });
-
-
-              div = d3.select("#treemapView").append("div")
-
-                .style("position", "relative")
-                .style("width", w + "px")
-                .style("height", h+"px")
-                .style("opacity",1);
-
-                //div.transition().style("height", h+"px").duration(500);
-          
-                root = dataIn;
-                node = root = dataIn;
-                nodes = treeMap.nodes(root)
-                
-            .filter(function(d) { return !d.children; });
-
-                  div.data([root]).selectAll("div").data(treeMap.nodes).enter().append("div").attr("class", function(d) {
-                            console.log(d)
-                            if(d.depth > 1 || d.depth == 0) {
-                                return "cell hide";
-                                
-                            } else {
-                                return "cell show";
-                            }
-                  })
-
-              .attr("id", function(d) { return "cell_" + d.index; })
-              .style("background", function(d) { console.log(d); return d.tintColor; })
-
-              .html(function(d) {
-
-
-                if(d.name=="Other leagues" || d.name=="Other countries"){
-                  var cellStr = getPostionStringTreemap(d.name);
-
-                }else{
-                  var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
-                }
-
-                console.log(cellStr)
-                return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
-                })//return d.children ? color(d.name) : null;
-              
-
-              .call(cell).on("click", function(d) {  
-                zoomToDetailView(d, this); 
-                //gotoPosition = $(this).offset().top;
-                iframeMessenger.getPositionInformation(scrollPage);
-              });
-              
-              div.selectAll(".cell").data(treeMap.value(function(d) {  return d.treeMapArea; })).call(cell);
-                
-        //  $(".cellCutBlock").hide();
-
+function checkCategory(s,str,n){
+    if(n < 3 && s == "nationality"){str = "Other countries"};
+    if(n < 3 && s == "previousLeague"){str = "Other leagues"};
+  return str;
 }
-
-
-function getPostionStringTreemap(strIn){
-
-  var strOut;
-
-  switch(strIn) {
-    case "G":
-      strOut= "Goalkeeper"
-      break;
-    case "D":
-      strOut= "Defender"
-      break;
-    case "M":
-      strOut= "Midfielder"
-      break;
-    case "F":
-      strOut= "Forward"
-      break;
-     default:
-     strOut= strIn
-    } 
-
-    return strOut;       
-
-}
-
-
-function myRound(num,decimals) {
-    var sign="£";
-    num = (num/1000000)
-    var newNum = num.toFixed(1);
-    num = (newNum*1)+0;
-    return sign +(num);
-}
-
-
-function position() {
-  this.style("left", function(d) { return d.x + "px"; })
-      .style("top", function(d) { return d.y + "px"; })
-      .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
-      .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
-}
-
-
-
-function filterArr(str){
-
-    var a = getCountByProperty(datasetAllTransfers, str);
-
-    a = buildTreeJson(a)
-
-    console.log(a)
-
-    buildTreeMap(a)
-}
-
-
 
 function addListeners(){
-    document.getElementById("filterDropdown").addEventListener("change", updateFromFilter);
-}
 
-function updateFromFilter(){
-    var x = document.getElementById("filterDropdown").value;
-    filterTreeMap(x);
-}
-
-function getCountByProperty(dataset, property) {
-    var totalPrice, totalSize = 0;
-
-     var a = _.groupBy(dataset, function(player) {
-        return player[property];
-    });
-
-
-     var a2 = _.each(a, function(item){
-                    var tempCost = 0;
-                        _.each(item, function(obj){
-                            
-                            tempCost+=(getVal(obj["Price"]))
-
-                        })  
-                        item.Price = tempCost;
-                        item.size = tempCost;
-        })
-     
-     return a2;
-}
-
-
-function getVal(n){
-    var checkNum = (isNaN(n))
-        if (checkNum){
-            n = 0;
-        } 
-
-    n = Number(n);       
-    return n;
-}
-
-
-function filterTreeMap(varIn){
-
-  globalSortVar=varIn;
-
-     var playerCount = getCountByProperty(dataset, varIn);
-
-           playerCountArray = _.map(playerCount, function(val, key, list) {
-                var num = _.reduce(val, function(memo, player) {
-                  var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);
-                  return memo + cost;
-                }, 0);
-
-
-                if (varIn=="Total spending"){
-                      return {
-                                  name: "Total spending",
-                                  totalCost: num,
-                                  size: val.length
-                              
-                              };
-                }else{
-                      return {
-                                name: key,
-                                totalCost: num,
-                                size: val.length
-                              };
-
-
-                }
+  var interactiveContainer = document.getElementById("interactiveContainer");
+        if(window.attachEvent) {
+            window.attachEvent('onresize', function() {
                 
-
+                console.log(interactiveContainer.offsetWidth);
             });
-
-
-           
-        rootJSON = buildTreeJson(playerCountArray);
-        
-        buildTreeMap(rootJSON);
-
-        checkWinSize(winW);
+        }
+        else if(window.addEventListener) {
+            window.addEventListener('resize', function() {
+                
+                console.log(interactiveContainer.offsetWidth);
+            }, true);
+        }
+        else {
+            //The browser does not support Javascript event binding
+        }
 }
 
 
+function buildTopBuyView(a){
+  var htmlStr = "";
 
-function checkWinSize(wideNumIn){
+  _.each(a, function (item,i){
+    htmlStr+= '<div class="gv-halo-column">'
+    htmlStr+= '<h2 class="gv-halo-head">'+item.nameofplayer+'</h2>'
+    htmlStr+= '<div class="gv-halo-image-holder" style="background: url('+item.imageurl+'/500.jpg)">'
+    htmlStr+= '</div>'  
+    htmlStr+= '<h5 class="gv-halo-cap-head">words here</h5>'
+    htmlStr+= '</div>'
+  })
 
-    var wideNumIn = w;
-    var w = document.getElementById("treemapContainer").offsetWidth;
-    
-    if(wideNumIn <= 899){
-      h = (w/6)*12;
-    }
-    if(wideNumIn > 899)
-
-    {
-      h = (w/10)*6;
-    }
-
-
-
-    rootJSON = buildTreeJson(playerCountArray);
-    document.getElementById("treemapView").innerHTML = "<div></div>";
-    
-    buildTreeMap(rootJSON);
-
-    
-
+  document.getElementById("topBuyContent").innerHTML = htmlStr;
+  
 }
 
 

@@ -1,0 +1,35 @@
+.gv-halo-column {
+    position: relative;
+    display: inline-block;
+    margin: 0 10px;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+}
+
+.gv-halo-head {
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #767676;
+    margin-bottom: 3px !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gv-halo-cap-head {
+    font-family: "Guardian Text Sans Web",Georgia,serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: #4cc5dc;
+    z-index: 1005;
+    -webkit-font-smoothing: antialiased;
+    /* color: #002b58; */
+}
+
+.gv-halo-image-holder{
+    width:100%;
+    background-size:cover !important;
+    background-repeat:no-repeat !important;
+    border-radius:999px;
+    padding-bottom:100%;
+}
