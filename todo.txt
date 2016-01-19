@@ -1,0 +1,2 @@
+Add sale figues around line 127
+// add sales to each object here or in getPlayerArr

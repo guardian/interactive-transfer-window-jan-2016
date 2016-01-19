@@ -6,8 +6,6 @@ import share from './lib/share'
 
 import underscore from 'underscore'
 import d3 from 'd3';
-import treemap from './lib/treemap'
-
 
 var _ = underscore;
 
@@ -16,7 +14,7 @@ var totalSpend;
 var shareFn = share('Guardian football transfer window', 'http://gu.com/p/URL', '#Interactive');
 var premClubsArr = [];
 var colorsArr = [];
-var transfersArr, myCutsIndex, treeJson, playerCountArray, rootJSON, parseData, dataset, starData, leaguesArray, nationalitiesArray;
+var transfersArr, myCutsIndex, treeJson, playerCountArray, rootJSON, parseData, dataset, starData, leaguesArray, nationalitiesArray, sellArr, gotoPosition;
 var myView = false;
 
 var globalW = 960;
@@ -67,9 +65,7 @@ function modelData(r){
 
         var topBuyArr = filterArray(starData,"topbuy","y");
 
-        var sellArr = filterArray(dataset,"previousleague","Premier League (England)");
-
-        console.log(sellArr)
+        sellArr = filterArray(dataset,"previousleague","Premier League (England)");
 
          _.each(premClubs, function(one){
               _.each(dataset, function(two){
@@ -125,12 +121,25 @@ function modelData(r){
                tempArrThree.push(newObj);
               
           });
-
+        
       dataset = tempArrThree;
+
+      // add sales to each object here or in getPlayerArr
+      _.each(dataset, function (five,i){
+          var sellAmount = 0;
+
+          _.each(sellArr, function (item){
+              //console.log(item)
+          })
+
+
+      })
       
       addListeners(); 
 
       buildTopBuyView(topBuyArr);
+
+      filterTreeMap(globalSortVar);
 
 }
 
@@ -145,6 +154,230 @@ function filterArray(a,q,v){
     return tempArr
 }
 
+function filterTreeMap(varIn){
+  globalSortVar=varIn;
+  document.getElementById("detailView").style.display="none";
+      var playerCount = getCountByProperty(dataset, varIn);
+        
+           playerCountArray = _.map(playerCount, function(val, key, list) {
+                var num = _.reduce(val, function(memo, player) {
+                  var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);
+
+                  return memo + cost;
+                }, 0);
+
+
+                if (varIn=="Total spending"){
+                      return {
+                                  name: "Total spending",
+                                  totalCost: num,
+                                  size: val.length
+                              
+                              };
+                }else{
+                      return {
+                                name: key,
+                                totalCost: num,
+                                size: val.length
+                              };
+
+
+                }
+                
+
+            });
+
+           _.each(rootJSON, function(item){
+            console.log(item)
+           })
+           
+        rootJSON = buildTreeJson(playerCountArray);
+        document.getElementById('treemapView').innerHTML = "";
+        buildTreeMap(rootJSON);
+        //console.log(rootJSON)
+        //checkWinSize(winW);
+}
+
+
+function buildTreeMap(dataIn){
+    
+    
+    
+    var w = 740, h = 600, treeMap, div, root, node, nodes;
+
+    var htmlStr = "";
+
+    
+
+    _.each(dataIn.children, function(obj){
+            obj.treeMapArea < 2800000 ? obj.treeMapArea = 3000000 : obj.treeMapArea = (obj.treeMapArea+2800000);
+        });
+
+     _.sortBy(dataIn.children, function(num, i){ return dataIn.children[i].value; });      
+        //positionDetailView();
+              treeMap = d3.layout.treemap()
+                .size([w, h])
+                .sticky(false)
+                .ratio('3')
+                .mode("dice")
+
+                .sort(function comparator(a, b) {
+                    if(a.name == "Other leagues"){
+                      a.totalCost = 0
+                    }
+
+                    if(a.name == "Other countries"){
+                      a.totalCost = 0
+                    }
+
+                  return a.totalCost - b.totalCost;
+                })
+
+                .round(true)
+                .value(function(d) { return d.size });
+
+
+              div = d3.select("#treemapView").append("div")
+                .style("position", "relative")
+                .style("width", w + "px")
+                .style("height", h+"px")
+                .style("opacity",1);
+
+                //div.transition().style("height", h+"px").duration(500);
+          
+                root = dataIn;
+                node = root = dataIn;
+                nodes = treeMap.nodes(root)
+
+
+                
+            .filter(function(d) { return !d.children; });
+
+                  div.data([root]).selectAll("div").data(treeMap.nodes).enter().append("div").attr("class", function(d) {
+                          
+                            if(d.depth > 1 || d.depth == 0) {
+                                 return "cell hide";
+                                
+                            } else {
+                                return "cell show";
+                            }
+                  })
+
+              .attr("id", function(d) { return "cell_" + d.index; })
+              .style("background", function(d) { return d.tintColor; })
+
+              .html(function(d) {
+                if(d.name=="Other leagues" || d.name=="Other countries"){
+                  var cellStr = getPostionStringTreemap(d.name);
+
+                }else{
+                  var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
+                }
+                return "<div class='cellCutBlock' id='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
+                })//return d.children ? color(d.name) : null;
+              
+
+              .call(cell).on("click", function(d) { 
+                var coOrds = getPosition(this)
+                zoomToDetailView(d, this); 
+                gotoPosition = coOrds.y;
+                iframeMessenger.getPositionInformation(scrollPage);
+              });
+              
+              div.selectAll(".cell").data(treeMap.value(function(d) {  return d.treeMapArea; })).call(cell);
+                
+          //document.getElementById("cellCutBlock").style.display = 'none';
+
+}
+
+function buildTreeJson(data) {
+    var root = {}, i, val, obj, othersObj;
+    root.name = "Root";
+    root.children = [];
+
+        for ( i = 0; i < data.length; i++) {
+
+            //val = data[i].value;
+            
+              //if(data[i]["totalCost"] > 0) {
+                  obj = {};
+                  obj.index = i;
+                  obj.name = data[i]["name"];
+                  obj.size = data[i]["totalCost"] + 100000;
+                  obj.value = data[i]["totalCost"];
+                  obj.sellValue = getSellVal(obj);
+                  
+                  obj.totalCost = (data[i]["totalCost"]);
+                  obj.treeMapArea = (data[i]["totalCost"]);
+                  obj.name = data[i]["name"];
+                  obj.tintColor = "#197caa";
+                  obj.children = null;
+            //}
+
+            root.children.push(obj);
+
+        }
+   
+    return root;
+}
+
+
+function getSellVal(obj){
+
+  var n = 0;
+
+  _.each(sellArr, function (item,i){
+      if(item.from == obj.name){
+        
+        var t= checkForNumber(item.price);
+        // console.log(t)
+        n+=t;
+      }    
+  })
+
+  return n;
+
+}
+
+function cell() {
+    this
+    .style("left", function(d) {
+      return d.x + "px";
+      
+    })
+
+    .style("top", function(d) {
+      return d.y + "px";
+    })
+
+    .style("width", function(d) {
+      return Math.max(0, d.dx - borderWidth) + "px";
+    })
+
+
+    .style("height", function(d) {
+      return Math.max(0, d.dy - borderWidth) + "px";
+    })
+
+    .style("display", function(d) {
+      if(d.depth <= 1 && d.depth != 0) {
+        return "block";
+      } else {
+        return "none";
+      }
+    })
+
+    // .transition()
+    //   .style("opacity","1")
+    //   .duration(500) // this is 1s
+    //   .ease("inOut")
+}
+
+function getCountByProperty(dataset, property) {
+    return _.groupBy(dataset, function(player) {
+      return player[property];
+    });
+}
 
 function getAgeGroup(objIn){
       var ageGroup;
@@ -265,8 +498,17 @@ function addListeners(){
         else {
             //The browser does not support Javascript event binding
         }
+
+  document.getElementById("filterDropdown").addEventListener('change', filterChanged);
 }
 
+function filterChanged(event) {
+  document.getElementById("detailView").style.display="none";
+   // $('#treemap-view').css('height', 'auto');
+
+    var varIn = this.value;
+    filterTreeMap(varIn);
+}
 
 function buildTopBuyView(a){
   var htmlStr = "";
@@ -284,14 +526,275 @@ function buildTopBuyView(a){
   
 }
 
+function getPosition(element) {
+    var xPosition = 0;
+    var yPosition = 0;
+  
+    while(element) {
+        xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+        element = element.offsetParent;
+    }
+    return { x: xPosition, y: yPosition };
+}
+
+
+function getPostionStringTreemap(strIn){
+
+  var strOut;
+
+  switch(strIn) {
+    case "G":
+      strOut= "Goalkeeper"
+      break;
+    case "D":
+      strOut= "Defender"
+      break;
+    case "M":
+      strOut= "Midfielder"
+      break;
+    case "F":
+      strOut= "Forward"
+      break;
+     default:
+     strOut= strIn
+    } 
+
+    return strOut;       
+
+}
+
+
+function myRound(num,decimals) {
+    var sign="£";
+    num = (num/1000000)
+    var newNum = num.toFixed(1);
+    num = (newNum*1)+0;
+    return sign +(num);
+}
+
+
+function scrollPage(d){
+   var scrollTo = d.pageYOffset + d.iframeTop + gotoPosition;
+   iframeMessenger.scrollTo(0, scrollTo);
+}
+
+
+function zoomToDetailView(d, currClip) { 
+  
+  document.getElementById("detailView").style.display="block";
+
+  console.log(d, currClip)
+
+
+ 
+  // var offset = $(currClip).offset();
+  // globalOffsetClip = $(currClip); 
+  // var newTop = (offset.top + $(currClip).height());
+  // var newLeft = offset.left;
+  var newArr = getDetailArray(d.name, globalSortVar);
+
+  setDetailView(newArr, globalSortVar, d);
 
 
 
-// $(window).resize(function() {
-    
-//   setTimeout(checkWinSize, 1000)
+  //     $("#detail-view").show().css({
+  //       opacity : 0
+  //     });
 
-// });
+
+
+
+  //     $("#treemapView").css({
+  //       height : ($(currClip).height() + parseInt($(currClip).css('top'), 10) ) + 'px'
+  //     });
+
+      
+
+  
+}
+
+ function getStarMan(d){
+  var obj;
+
+  _.each(starData, function(one){
+
+          if(one.category === d.name){
+                  obj = one;      
+              }           
+          });
+      
+    return obj;
+ }
+
+
+function getDetailArray (nameIn,valIn){
+  //buyArray, to, "Arsenal"
+      var tempArr = [];
+  //getClubArray(d.name, globalSortVar);
+
+      if (valIn!="Total spending"){
+          tempArr = _.filter(dataset, function(item){ return item[valIn] == nameIn; });
+          
+      }else{
+          tempArr = dataset;
+      }
+      
+  return tempArr;
+}
+
+function getSpendStr(strIn){
+
+  var strOut;
+
+  switch(strIn) {
+    case "to":
+      strOut= "spent by this club"
+      break;
+    case "previousleague":
+      strOut= "spent on players from this league"
+      break;
+    case "age-group":
+      strOut= "spent on players in this age range"
+      break;
+    case "nationality":
+      strOut= "spent on players from this country"
+      break;
+    case "position":
+      strOut= "spent on players in this position"
+      break;
+     default:
+     strOut= strIn
+    } 
+
+    //strOut = "&nbsp;";
+
+    return strOut;   
+
+}
+
+function getPostionString(strIn){
+
+  var strOut;
+
+  switch(strIn) {
+    case "G":
+      strOut= "goalkeeper"
+      break;
+    case "D":
+      strOut= "defender"
+      break;
+    case "M":
+      strOut= "midfielder"
+      break;
+    case "F":
+      strOut= "forward"
+      break;
+     default:
+     strOut= strIn
+    } 
+
+    return strOut;       
+
+}
+
+function setDetailView(arrIn,strIn,d){
+    var starPlayerInfo = getStarMan(d);
+    var htmlStrR = "";
+    var htmlStrC = "";
+    var totalFees = 0;
+    var checkStarName = starPlayerInfo.nameofplayer;
+    var starPlayerFormatName = starPlayerInfo.nameofplayer;
+    var spendStr = getSpendStr(strIn);
+
+    starPlayerFormatName = starPlayerFormatName.replace(/\s+/g, '&nbsp;');
+   
+    strIn == "Total spending" ? document.getElementById("detailHeader").innerHTML ="Total spending" :  document.getElementById("detailHeader").innerHTML = (getPostionString(arrIn[0][strIn]));
+   
+
+        _.each(arrIn, function(item) {
+
+            var tempFee = checkForNumber(item.price);
+            var displayFee = tempFee;
+            displayFee == 0 ? displayFee = item.price : displayFee = myRound(tempFee, 2 )+"m";
+
+
+            if(checkStarName==item.playername){
+              
+              var starStr="";
+              starStr+="<h3>"+item.playername+" <span style='font-weight:200; font-size:80%'>(pictured above)</span></h3>";
+              starStr+="<p>";
+              if(strIn=="previousleague" && arrIn[0][strIn]=="Other leagues"){
+                    starStr+="Previous&nbsp;league:&nbsp;"+item.displayPreviousLeague+". <br/>";
+              }
+
+              if(strIn=="nationality" && arrIn[0][strIn]=="Other countries"){
+                  htmlStrR+="Nationality:&nbsp;"+item.displayNationality+"</br>";
+              }
+
+              starStr+=displayFee+". To "+item.to+" from "+item.from;
+              starStr+="<br/>Position:&nbsp;"+getPostionString(item.position).toLowerCase()+". ";
+              starStr+="Age:&nbsp;"+item.age+". "; 
+
+              if(arrIn[0][strIn]!="Other countries"){
+              starStr+="Nationality:&nbsp;"+item.displayNationality+"</p>";
+              }
+
+              // get the starman at the top of htmlStrR even if the starMan is in middle of arrin
+              htmlStrR=starStr+" "+htmlStrR;
+
+            }
+
+
+            
+            if(checkStarName!=item.playername){
+              htmlStrR+="<h3>"+item.playername+"</h3>";
+              htmlStrR+="<p>";
+
+              if(strIn=="previousleague" && arrIn[0][strIn]=="Other leagues"){
+                    htmlStrR+="Previous&nbsp;league:&nbsp;"+item.displayPreviousLeague+". <br/>";
+              }
+
+              if(strIn=="nationality" && arrIn[0][strIn]=="Other countries"){
+                    htmlStrR+="Nationality:&nbsp;"+item.displayNationality+"</br>";
+              }
+
+              htmlStrR+=displayFee+". To "+item.to+" from "+item.from;
+              htmlStrR+="<br/>Position:&nbsp;"+getPostionString(item.position)+". ";
+              htmlStrR+="Age:&nbsp;"+item.age+". ";
+
+              if(arrIn[0][strIn]!="Other countries"){
+                    htmlStrR+="Nationality:&nbsp;"+item.displayNationality+"</p>";
+              }
+            }
+            
+            totalFees+=tempFee;
+
+          })
+        htmlStrR="<div id='starManContainer'><div id='starManPic' style='background-image: url("+starPlayerInfo.imageurl+"/500.jpg)'></div><div id='transferList'>"+htmlStrR+"</div>";
+
+        htmlStrR+="<br/><div class='styled-select'><button id='back-to-top'>back to top of interactive</button></div>";
+        // 
+
+
+       //$("#center-panel").html(htmlStrC);
+        document.getElementById("centerPanel").innerHTML = htmlStrR;
+
+        if(arrIn[0][strIn]=="Other leagues" || arrIn[0][strIn]=="Other countries"){
+          document.getElementById("leftPanel").innerHTML = " ";
+        }else{
+           document.getElementById("leftPanel").innerHTML = "<div class='large-number-left'>"+myRound(totalFees, 2 )+"<span class='large-number-left-M'>m</span></div><div class='number-caption'>"+spendStr+"</div>";
+        }
+        
+        
+
+        //<div class='number-caption'>PLAYERS SOLD</div><div class='large-number-left'>"+myRound(totalFees, 2 )+"m</div>
+        //var position = $("#treemap-view").position();
+
+        //$('#back-to-top').on('click', function(){ gotoPosition=0; iframeMessenger.getPositionInformation(scrollPage) });
+
+}
+
 
 
 

@@ -51,7 +51,23 @@
         <div class="gv-layout-flex" id="graphContent">
             
         <div class="gv-holder-div"> 
-            <div class="gv-graph-axis"><span class="timeline__one" style="left: 0%; width: 16.666666666666668%">Spending £millions</span> <span class="timeline__label" style="left: 28.57%">20</span> <span class="timeline__label" style="left: 42.86%">30</span> <span class="timeline__label" style="left: 57.15%">40</span> <span class="timeline__label" style="left: 71.42%">50</span> <span class="timeline__label" style="left: 85.71%">60</span> <span class="timeline__label gv-hide-mobile" style="left: 100%">70</span></div>
+
+
+            <div class="gv-dropdown">
+                        <div class="styled-select">
+                            <select class="gv-select" id="filterDropdownGraph"> 
+                                <option value="to">Most spent</option>
+                                  <option value="age-group">Most sold</option>
+                                  
+                            </select>
+                        </div>
+                        <div id="filter-label">
+                            Sort:
+                        </div>
+            </div>
+
+
+            <div class="gv-graph-axis" style="margin-bottom:60px;"><span class="timeline__one" style="left: 0%; width: 16.666666666666668%">Spending £millions</span> <span class="timeline__label" style="left: 28.57%">20</span> <span class="timeline__label" style="left: 42.86%">30</span> <span class="timeline__label" style="left: 57.15%">40</span> <span class="timeline__label" style="left: 71.42%">50</span> <span class="timeline__label" style="left: 85.71%">60</span> <span class="timeline__label gv-hide-mobile" style="left: 100%">70</span></div>
                 <table class="bars-data-table" id="topFiveTable">
         <tbody>
         <tr class="spaceAbove">
@@ -206,58 +222,56 @@
         <div class="gv-layout-flex">
             <div class="gv-flex-4 gv- ">
                 <div class="gv-holder-div"> 
-                            <div class="gv-dropdown">
-                                            <div class="styled-select">
-                                                <select class="gv-select" id="filterDropdown"> 
-                                                    <option value="to">Club</option>
-                                                      <option value="age-group">Age range</option>
-                                                      <option value="nationality">Country</option>
-                                                      <option value="previousleague">Previous league</option>
-                                                      <option value="position">Position</option>
-                                                      <option value="Total spending">Total spending</option>
-                                                </select>
-                                            </div>
-                                            <div id="filter-label">
-                                                Showing:
-                                            </div>
-                                </div>
+
+                    <div class="gv-dropdown">
+                                    <div class="styled-select">
+                                        <select class="gv-select" id="filterDropdown"> 
+                                            <option value="to">Club</option>
+                                              <option value="age-group">Age range</option>
+                                              <option value="nationality">Country</option>
+                                              <option value="previousleague">Previous league</option>
+                                              <option value="position">Position</option>
+                                              <option value="Total spending">Total spending</option>
+                                        </select>
+                                    </div>
+                                    <div id="filter-label">
+                                        Showing:
+                                    </div>
+                        </div>
                                 
 
-                                <div class="treemapContainer">
-                                        <div id="treemapView">
+                        <div class="treemapContainer">
+                                <div id="treemapView">
 
 
-                                          </div>
+                                  </div>
 
-                                          <div id="detail-view">
+                                  <div id="detailView">
 
-                                          <div class='detail_header'></div> 
-                                          
-                                          <div id="left-panel" class="column">
-                                            
-                                        <div id='detail_view_totalfee'></div>
+                                  <div class='detail_header' id="detailHeader">header</div> 
+                                  
+                                  <div id="leftPanel" class="column">
+                                    
+                                <div id='detail_view_totalfee'>0m</div>
 
-                                            
-                                          </div>
-                                           
-                                          <div id="center-panel" class="column">
-                                          
-                                           
-                                          </div> 
+                                    
+                                  </div>
+                                   
+                                  <div id="centerPanel" class="column">
+                                  
+                                   
+                                  </div> 
 
-                                         
-                                          <div id="back-button">close </div>
+                                 
+                                  <div id="back-button">close </div>
 
 
 
-                                        </div> 
-                                      
                                 </div> 
+                              
+                        </div> 
 
-                    <!-- <div class="gv-iframe" data-asset-type="iframe" data-url="http://interactive.guim.co.uk/uploader/embed/2015/09/archive-9-zip/giv-31114zRFKq1RnwWPQ/">
-                        <iframe height="564" src="http://interactive.guim.co.uk/uploader/embed/2015/09/archive-9-zip/giv-31114zRFKq1RnwWPQ/" style="width: 100%; border: none;">
-                        </iframe>
-                    </div>  -->  
+                   
 
                     </div>               
             </div>          
@@ -268,7 +282,10 @@
                 
     </div>
 
-       
+        <!-- <div class="gv-iframe" data-asset-type="iframe" data-url="http://interactive.guim.co.uk/uploader/embed/2015/09/archive-9-zip/giv-31114zRFKq1RnwWPQ/">
+                        <iframe height="564" src="http://interactive.guim.co.uk/uploader/embed/2015/09/archive-9-zip/giv-31114zRFKq1RnwWPQ/" style="width: 100%; border: none;">
+                        </iframe>
+                    </div>  -->  
 
     <!-- <ul class="fonts">
         <li class="fonts__egyptian">Egyptian</li>

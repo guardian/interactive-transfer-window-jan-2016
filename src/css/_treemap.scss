@@ -30,7 +30,7 @@
             cursor: pointer;
             font-family: "Guardian Agate Sans", Arial, sans-serif;
             font-size: 14px;
-            background:url('../images/btn_close.png') no-repeat;
+            background:url('..assets/imgs/btn_close.png') no-repeat;
             background-position: -3px 0px;
             padding: 9px 0 0 33px;
             color: #a7a9ac;
@@ -56,7 +56,7 @@
         }
 
         .detail_header{
-            font-family: "Guardian Egyptian Headline", Georgia, serif;
+            font-family: "Guardian Egyptian Web", Georgia, serif;
             font-weight:700;
             font-size: 2.2em;
             width:100%;
@@ -72,3 +72,33 @@
           position: absolute;
           text-indent: 2px;
         }
+
+        .cell{
+            border: solid 1px white;
+            color: #fff;
+            overflow: hidden;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .cell:hover {
+            opacity:0.7;
+            filter:alpha(opacity=70); /* For IE8 and earlier */
+        }
+
+        .cellValue {
+
+            font: 2.4em "Guardian Egyptian Web";
+            line-height: 30px;
+
+        }
+        .cell-info {
+            margin: 6px 0 0 6px;
+        }
+
+        .cellLabel {
+            font: 18px "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
+            line-height: 14px;
+            
+        }
+            
