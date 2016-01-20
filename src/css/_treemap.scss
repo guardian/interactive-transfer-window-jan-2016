@@ -79,6 +79,9 @@
             overflow: hidden;
             position: absolute;
             cursor: pointer;
+            stroke:#FFF;
+            stroke-width:1;
+            stroke-opacity:0.9
         }
 
         .cell:hover {
@@ -97,8 +100,25 @@
         }
 
         .cellLabel {
-            font: 18px "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
+            font: 15px "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
             line-height: 14px;
+            fill:#FFF;
+            stroke:none;
             
         }
+
+
+.chart {
+  display: block;
+  margin: auto;
+  margin-top: 40px;
+}
+
+text {
+  font-size: 11px;
+}
+
+rect {
+  fill: none;
+}
             
