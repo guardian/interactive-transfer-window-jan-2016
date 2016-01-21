@@ -208,9 +208,8 @@ function buildTreeMap(dataJSON){
 
   _.sortBy(dataJSON.children, function(num, i){ return dataJSON.children[i].size; }); 
 
-  
-var w = 1280 - 80,
-              h = 800 - 180,
+    var w = document.getElementById("treemapFlex").offsetWidth,
+              h = w*0.36,
               x = d3.scale.linear().range([0, w]),
               y = d3.scale.linear().range([0, h]),
               color = d3.scale.category20c(),
@@ -238,12 +237,8 @@ var w = 1280 - 80,
               .attr("transform", "translate(.5,.5)");
 
           d3.json(dataJSON, function(data) {
-                   
-
 
               node = root = dataJSON;
-            
-
               console.log(node)
 
             var nodes = treemap.nodes(root)
@@ -658,14 +653,12 @@ function addListeners(){
   var interactiveContainer = document.getElementById("interactiveContainer");
         if(window.attachEvent) {
             window.attachEvent('onresize', function() {
-                
-                console.log(interactiveContainer.offsetWidth);
+                setTimeout(checkWinSize, 1000);
             });
         }
         else if(window.addEventListener) {
             window.addEventListener('resize', function() {
-                
-                console.log(interactiveContainer.offsetWidth);
+                setTimeout(checkWinSize, 1000);
             }, true);
         }
         else {
@@ -673,6 +666,39 @@ function addListeners(){
         }
 
   document.getElementById("filterDropdown").addEventListener('change', filterChanged);
+}
+
+
+
+
+
+
+function checkWinSize(){
+
+    console.log(interactiveContainer.offsetWidth);
+
+    // var wideNumIn = w;
+
+    // w = $("#treemap-container").outerWidth();
+    // if(wideNumIn <= 899){
+    //   h = (w/6)*18;
+    // }
+    // if(wideNumIn > 899)
+
+    // {
+    //   h = (w/10)*6;
+    // }
+
+
+
+    rootJSON = buildTreeJson(playerCountArray);
+    //$('#treemap-view').empty();
+    //.css({height: "auto"});
+    buildTreeMap(rootJSON);
+
+    //$("#detail-view").hide();
+    //$('#treemap-view').css('height', 'auto');
+
 }
 
 function filterChanged(event) {
