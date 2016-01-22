@@ -196,10 +196,17 @@ function modelData(r){
       
       addListeners(); 
 
-      buildTopBuyView(topBuyArr);
+      setView(topBuyArr);
 
-      filterTreeMap(globalSortVar);
+      
 
+}
+
+function setView(topBuyArr){
+  
+  buildTopBuyView(topBuyArr);
+  filterTreeMap(globalSortVar);
+  resetTreeMapDetails();
 }
 
 
@@ -219,6 +226,8 @@ function filterTreeMap(varIn){
       var playerCount = getCountByProperty(dataset, varIn);
         
            playerCountArray = _.map(playerCount, function(val, key, list) {
+
+
                   var num = _.reduce(val, function(memo, player) {
                   var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);
                   return memo + cost;
@@ -259,6 +268,7 @@ function filterTreeMap(varIn){
 
 function buildTreeMap(dataJSON){
   var cellPad = {t:12, b:0, r:0, l:6};
+
   _.sortBy(dataJSON.children, function(num, i){ return dataJSON.children[i].size; }); 
 
     var w = document.getElementById("treemapFlex").offsetWidth,
@@ -287,18 +297,22 @@ function buildTreeMap(dataJSON){
             .append("svg:g")
               .attr("transform", "translate(.5,.5)");
 
-          d3.json(dataJSON, function(data,key) {
+          d3.json(dataJSON, function(data) {
 
               node = root = dataJSON;
-              console.log(node)
-
-            var nodes = treemap.nodes(root)
-                .filter(function(d) {  return !d.children; });
- 
+              
+              
+            var nodes = treemap.nodes(root)            
+                .filter(function(d) {  console.log(!d.children); return !d.children; });
+            
             var cell = svg.selectAll("g")
                 .data(nodes)
-              .enter().append("svg:g")
+
+                
+
+            .enter().append("svg:g")
                 .attr("class", "cell")
+                .attr("id",function(d,i){ return "tree-cell_"+i})
                 .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
                 .on("click", function(d) { return zoom( node == d.parent ? root : d.parent,"in" ); });
 
@@ -307,22 +321,111 @@ function buildTreeMap(dataJSON){
                 .attr("height", function(d) { return d.dy + 1; })
                 .style("fill", "#005689");
 
+            // cell.append("svg:text")
+            //     .attr("x", cellPad.l)
+            //     .attr("y", cellPad.t)
+            //     .attr("dy", ".35em")
+            //     .attr("text-anchor", "left")
+            //     .text(function(d) { return d.parent.name; })
+            //     .attr("class", "cellLabel")
+            //     .style("opacity", function(d) { d.w = this.getComputedTextLength(); return d.dx > d.w ? 1 : 0; });
+
             cell.append("svg:text")
                 .attr("x", cellPad.l)
-                .attr("y", cellPad.t)
-                .attr("dy", ".35em")
+                .attr("y", function(){ return (cellPad.t*3)})
+                .attr("dy", "6px")
                 .attr("text-anchor", "left")
-                .text(function(d) { return d.parent.name; })
-                .attr("class", "cellLabel")
+                .text(function(d) { return d.parent.displayFee; })
+                .attr("class", "cellLabelFee")
                 .style("opacity", function(d) { d.w = this.getComputedTextLength(); return d.dx > d.w ? 1 : 0; });
 
-             d3.select(window).on("click", function() { zoom(root,"out"); });
+                
 
-            d3.select("select").on("change", function() {
+           d3.select(window).on("click", function() { zoom(root,"out"); });
+
+          d3.select("select").on("change", function() {
               treemap.value(this.value == "size" ? size : count).nodes(root);
               zoom(node);
             });
           });
+
+            function zoom(d,dir) {
+
+              var kx = w / d.dx, ky = h / d.dy;
+              x.domain([d.x, d.x + d.dx]);
+              y.domain([d.y, d.y + d.dy]);
+
+              var c = svg.selectAll("g.cell").transition()
+                  .duration(d3.event.altKey ? 7500 : 750)
+                  .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+              c.select("rect")
+                  .attr("width", function(d) { return kx * d.dx - 1; })
+                  .attr("height", function(d) { return ky * d.dy - 1; })
+
+              c.select(".cellLabel")
+                  .attr("x", function(d) { return cellPad.l; })
+                  .attr("y", function(d) { return cellPad.t; })
+                  .text(function(d) { return setCellLabels(d,dir) })
+                  .style("opacity", function(d) { return kx * d.dx > d.w ? 1 : 0; });
+
+              node = d;
+              d3.event.stopPropagation();
+
+              dir == "in" ?   getTreeMapDetails(d):resetTreeMapDetails();
+            }
+}
+
+
+function setCellLabels(d,dir){
+  console.log(d)
+    if(dir=="out"){ return d.parent.name +"<br>"+d.parent.displayFee};
+    if(dir=="in"){ return d.name +"<br>"+d.displayFee} ;
+}
+
+
+function buildTreeJson(data) {
+    var r = {}, i, obj;
+    r.name = "flare";
+    r.children = [];
+    var hex;
+   for ( i = 0; i < data.length; i++) {
+          var tempGrandChildren = [];
+
+          _.each(dataset, function(item,k){
+                if (item.to == data[i]["name"]){
+                  console.log(item)
+
+                  var grandChild = {};
+                  grandChild.tintColor = item.hex;
+                  grandChild.name = item.playername;
+                  grandChild.size = checkForNumber(item.price) + 1000000
+                  grandChild.displayFee = item.displayFee 
+                  grandChild.buyClub = item.to 
+                  grandChild.sellClub = item.from 
+                  grandChild.position = item.position 
+                  tempGrandChildren.push(grandChild)
+                  hex = item.hex;
+                }
+            })
+
+               
+                  obj = {};
+                  obj.name = data[i]["name"];
+                  obj.size = data[i]["size"]
+                  obj.totalCost = data[i]["totalCost"]
+                  obj.displayFee = myRound(obj.totalCost)+"m"
+                  obj.tintColor = hex
+                  obj.children = tempGrandChildren;
+
+            r.children.push(obj);
+            console.log(data[i])
+        }
+
+    return r;
+}
+
+
 function size(d) {
   return d.size;
 }
@@ -433,7 +536,7 @@ function setStarManDetail(d){
 }
 
 
-function resetTreeMapDetails(d){
+function resetTreeMapDetails(){
 
     var htmlStr= "<h2>Total spending</h2>"
       htmlStr+="<p>"+myRound(totalSpend)+"m</p>";
@@ -445,86 +548,6 @@ function resetTreeMapDetails(d){
     document.getElementById("detailHead").innerHTML = htmlStr;
     
 }
-
-
-function zoom(d,dir) {
-
-  var kx = w / d.dx, ky = h / d.dy;
-  x.domain([d.x, d.x + d.dx]);
-  y.domain([d.y, d.y + d.dy]);
-
-  var t = svg.selectAll("g.cell").transition()
-      .duration(d3.event.altKey ? 7500 : 750)
-      .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-
-  t.select("rect")
-      .attr("width", function(d) { return kx * d.dx - 1; })
-      .attr("height", function(d) { return ky * d.dy - 1; })
-
-  t.select("text")
-
-      .attr("x", function(d) { return cellPad.l; })
-      .attr("y", function(d) { return cellPad.t; })
-      .text(function(d) { return setCellLabels(d,dir) })
-      .style("opacity", function(d) { return kx * d.dx > d.w ? 1 : 0; });
-
-  node = d;
-  d3.event.stopPropagation();
-
-  dir == "in" ?   getTreeMapDetails(d):resetTreeMapDetails(d);
-}
-}
-
-function setCellLabels(d,dir){
-
-  console.log(d)
-    if(dir=="out"){ return d.parent.name +"<br>"+d.parent.displayFee};
-    if(dir=="in"){ return d.name +"<br>"+d.displayFee} ;
-}
-
-
-function buildTreeJson(data) {
-    var r = {}, i, obj;
-    r.name = "flare";
-    r.children = [];
-    var hex;
-
-
-        for ( i = 0; i < data.length; i++) {
-          var tempGrandChildren = [];
-
-          _.each(dataset, function(item,k){
-                if (item.to == data[i]["name"]){
-                  console.log(item)
-
-                  var grandChild = {};
-                  grandChild.tintColor = item.hex;
-                  grandChild.name = item.playername;
-                  grandChild.size = checkForNumber(item.price) + 1000000
-                  grandChild.displayFee = item.displayFee 
-                  grandChild.buyClub = item.to 
-                  grandChild.sellClub = item.from 
-                  grandChild.position = item.position 
-                  tempGrandChildren.push(grandChild)
-                  hex = item.hex;
-                }
-            })
-
-               
-                  obj = {};
-                  obj.name = data[i]["name"];
-                  obj.size = data[i]["size"]
-                  obj.totalCost = data[i]["totalCost"]
-                  obj.tintColor = hex
-                  obj.children = tempGrandChildren;
-
-            r.children.push(obj);
-
-        }
-
-    return r;
-}
-
 
 function getSellVal(obj){
 
@@ -758,6 +781,8 @@ function buildTopBuyView(a){
   })
 
   document.getElementById("topBuyContent").innerHTML = htmlStr;
+
+
   
 }
 
