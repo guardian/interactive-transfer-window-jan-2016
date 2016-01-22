@@ -1,3 +1,49 @@
+#chart{
+    text {
+      pointer-events: none;
+      font-family: "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        line-height:18px;
+    }
+
+    .grandparent text {
+      font-weight: bold;
+    }
+
+    rect {
+      fill: none;
+      stroke: #fff;
+    }
+
+    rect.parent,
+    .grandparent rect {
+      stroke-width: 2px;
+    }
+
+    .grandparent rect {
+      fill: orange;
+    }
+
+    .grandparent:hover rect {
+      fill: #ee9700;
+    }
+
+    .children rect.parent,
+    .grandparent rect {
+      cursor: pointer;
+    }
+
+    .children rect.parent {
+      fill: #bbb;
+      fill-opacity: .5;
+    }
+
+    .children:hover rect.child {
+      fill: #bbb;
+    }
+}
+
+
 .column {
     position:relative;
     top: 0px;

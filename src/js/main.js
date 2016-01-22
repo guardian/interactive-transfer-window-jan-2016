@@ -267,113 +267,9 @@ function filterTreeMap(varIn){
 
 
 function buildTreeMap(dataJSON){
-  var cellPad = {t:12, b:0, r:0, l:6};
 
-  _.sortBy(dataJSON.children, function(num, i){ return dataJSON.children[i].size; }); 
-
-    var w = document.getElementById("treemapFlex").offsetWidth,
-              h = w*0.36,
-              x = d3.scale.linear().range([0, w]),
-              y = d3.scale.linear().range([0, h]),
-              color = d3.scale.category20c(),
-              root, svg, node;
-
-
-          var treemap = d3.layout.treemap()
-              .round(false)
-              .size([w, h])
-              .sticky(true)
-              .ratio(3)
-              .value(function(d) { return d.size; });
-
-
-          svg = d3.select("#treemapFlex").append("div")
-              .attr("class", "chart")
-              .style("width", w + "px")
-              .style("height", h + "px")
-            .append("svg:svg")
-              .attr("width", w)
-              .attr("height", h)
-            .append("svg:g")
-              .attr("transform", "translate(.5,.5)");
-
-          d3.json(dataJSON, function(data) {
-
-              node = root = dataJSON;
-              
-              
-            var nodes = treemap.nodes(root)            
-                .filter(function(d) {  console.log(!d.children); return !d.children; });
-            
-            var cell = svg.selectAll("g")
-                .data(nodes)
-
-                
-
-            .enter().append("svg:g")
-                .attr("class", "cell")
-                .attr("id",function(d,i){ return "tree-cell_"+i})
-                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-                .on("click", function(d) { return zoom( node == d.parent ? root : d.parent,"in" ); });
-
-            cell.append("svg:rect")
-                .attr("width", function(d) { return d.dx + 1; })
-                .attr("height", function(d) { return d.dy + 1; })
-                .style("fill", "#005689");
-
-            // cell.append("svg:text")
-            //     .attr("x", cellPad.l)
-            //     .attr("y", cellPad.t)
-            //     .attr("dy", ".35em")
-            //     .attr("text-anchor", "left")
-            //     .text(function(d) { return d.parent.name; })
-            //     .attr("class", "cellLabel")
-            //     .style("opacity", function(d) { d.w = this.getComputedTextLength(); return d.dx > d.w ? 1 : 0; });
-
-            cell.append("svg:text")
-                .attr("x", cellPad.l)
-                .attr("y", function(){ return (cellPad.t*3)})
-                .attr("dy", "6px")
-                .attr("text-anchor", "left")
-                .text(function(d) { return d.parent.displayFee; })
-                .attr("class", "cellLabelFee")
-                .style("opacity", function(d) { d.w = this.getComputedTextLength(); return d.dx > d.w ? 1 : 0; });
-
-                
-
-           d3.select(window).on("click", function() { zoom(root,"out"); });
-
-          d3.select("select").on("change", function() {
-              treemap.value(this.value == "size" ? size : count).nodes(root);
-              zoom(node);
-            });
-          });
-
-            function zoom(d,dir) {
-
-              var kx = w / d.dx, ky = h / d.dy;
-              x.domain([d.x, d.x + d.dx]);
-              y.domain([d.y, d.y + d.dy]);
-
-              var c = svg.selectAll("g.cell").transition()
-                  .duration(d3.event.altKey ? 7500 : 750)
-                  .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-
-              c.select("rect")
-                  .attr("width", function(d) { return kx * d.dx - 1; })
-                  .attr("height", function(d) { return ky * d.dy - 1; })
-
-              c.select(".cellLabel")
-                  .attr("x", function(d) { return cellPad.l; })
-                  .attr("y", function(d) { return cellPad.t; })
-                  .text(function(d) { return setCellLabels(d,dir) })
-                  .style("opacity", function(d) { return kx * d.dx > d.w ? 1 : 0; });
-
-              node = d;
-              d3.event.stopPropagation();
-
-              dir == "in" ?   getTreeMapDetails(d):resetTreeMapDetails();
-            }
+  addD3Tree(dataJSON)
+ 
 }
 
 
@@ -386,7 +282,7 @@ function setCellLabels(d,dir){
 
 function buildTreeJson(data) {
     var r = {}, i, obj;
-    r.name = "flare";
+    r.name = "root";
     r.children = [];
     var hex;
    for ( i = 0; i < data.length; i++) {
@@ -400,6 +296,7 @@ function buildTreeJson(data) {
                   grandChild.tintColor = item.hex;
                   grandChild.name = item.playername;
                   grandChild.size = checkForNumber(item.price) + 1000000
+                  grandChild.value = checkForNumber(item.price) + 1000000
                   grandChild.displayFee = item.displayFee 
                   grandChild.buyClub = item.to 
                   grandChild.sellClub = item.from 
@@ -413,14 +310,17 @@ function buildTreeJson(data) {
                   obj = {};
                   obj.name = data[i]["name"];
                   obj.size = data[i]["size"]
+                  obj.value = data[i]["size"]
                   obj.totalCost = data[i]["totalCost"]
                   obj.displayFee = myRound(obj.totalCost)+"m"
                   obj.tintColor = hex
                   obj.children = tempGrandChildren;
 
             r.children.push(obj);
-            console.log(data[i])
+       
         }
+
+        console.log(r)
 
     return r;
 }
@@ -1056,6 +956,193 @@ function setDetailView(arrIn,strIn,d, c, h){
 }
 
 
+
+
+function addD3Tree(dataJSON){
+
+          console.log(dataJSON)
+
+                      var margin = {top: 20, right: 0, bottom: 0, left: 0},
+                          width = 960,
+                          height = 500 - margin.top - margin.bottom,
+                          formatNumber = d3.format(",d"),
+                          transitioning;
+
+                      var x = d3.scale.linear()
+                          .domain([0, width])
+                          .range([0, width]);
+
+                      var y = d3.scale.linear()
+                          .domain([0, height])
+                          .range([0, height]);
+
+                      var treemap = d3.layout.treemap()
+                          .children(function(d, depth) { return depth ? null : d._children; })
+                          .sort(function(a, b) { return a.value - b.value; })
+                          .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
+                          .round(false);
+
+                      var svg = d3.select("#treemapFlex").append("svg")
+                          .attr("width", width + margin.left + margin.right)
+                          .attr("height", height + margin.bottom + margin.top)
+                          .style("margin-left", -margin.left + "px")
+                          .style("margin.right", -margin.right + "px")
+                        .append("g")
+                          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                          .style("shape-rendering", "crispEdges");
+
+                      var grandparent = svg.append("g")
+                          .attr("class", "grandparent");
+
+                      grandparent.append("rect")
+                          .attr("y", -margin.top)
+                          .attr("width", width)
+                          .attr("height", margin.top);
+
+                      grandparent.append("text")
+                          .attr("x", 6)
+                          .attr("y", 6 - margin.top)
+                          .attr("dy", ".75em");
+
+                      d3.json(dataJSON, function() {
+                        var root, node;
+                        node = root = dataJSON;
+                        initialize(root);
+                        accumulate(root);
+                        layout(root);
+                        display(root);
+
+                        function initialize(root) {
+                          root.x = root.y = 0;
+                          root.dx = width;
+                          root.dy = height;
+                          root.depth = 0;
+                        }
+
+                        // Aggregate the values for internal nodes. This is normally done by the
+                        // treemap layout, but not here because of our custom implementation.
+                        // We also take a snapshot of the original children (_children) to avoid
+                        // the children being overwritten when when layout is computed.
+                        function accumulate(d) {
+                          return (d._children = d.children)
+                              ? d.value = d.children.reduce(function(p, v) { return p + accumulate(v); }, 0)
+                              : d.value;
+                        }
+
+                        // Compute the treemap layout recursively such that each group of siblings
+                        // uses the same size (1×1) rather than the dimensions of the parent cell.
+                        // This optimizes the layout for the current zoom state. Note that a wrapper
+                        // object is created for the parent node for each group of siblings so that
+                        // the parent’s dimensions are not discarded as we recurse. Since each group
+                        // of sibling was laid out in 1×1, we must rescale to fit using absolute
+                        // coordinates. This lets us use a viewport to zoom.
+                        function layout(d) {
+                          if (d._children) {
+                            treemap.nodes({_children: d._children});
+                            d._children.forEach(function(c) {
+                              c.x = d.x + c.x * d.dx;
+                              c.y = d.y + c.y * d.dy;
+                              c.dx *= d.dx;
+                              c.dy *= d.dy;
+                              c.parent = d;
+                              layout(c);
+                            });
+                          }
+                        }
+
+                        function display(d) {
+                          grandparent
+                              .datum(d.parent)
+                              .on("click", transition)
+                            .select("text")
+                              .text(name(d));
+
+                          var g1 = svg.insert("g", ".grandparent")
+                              .datum(d)
+                              .attr("class", "depth");
+
+                          var g = g1.selectAll("g")
+                              .data(d._children)
+                            .enter().append("g");
+
+                          g.filter(function(d) { return d._children; })
+                              .classed("children", true)
+                              .on("click", transition);
+
+                          g.selectAll(".child")
+                              .data(function(d) { return d._children || [d]; })
+                            .enter().append("rect")
+                              .attr("class", "child")
+                              .call(rect);
+
+                          g.append("rect")
+                              .attr("class", "parent")
+                              .call(rect)
+                            .append("title")
+                              .text(function(d) { return formatNumber(d.value); });
+
+                          g.append("text")
+                              .attr("dy", ".75em")
+                              .text(function(d) { return d.name; })
+                              .call(text);
+
+                          function transition(d) {
+                            if (transitioning || !d) return;
+                            transitioning = true;
+
+                            var g2 = display(d),
+                                t1 = g1.transition().duration(750),
+                                t2 = g2.transition().duration(750);
+
+                            // Update the domain only after entering new elements.
+                            x.domain([d.x, d.x + d.dx]);
+                            y.domain([d.y, d.y + d.dy]);
+
+                            // Enable anti-aliasing during the transition.
+                            svg.style("shape-rendering", null);
+
+                            // Draw child nodes on top of parent nodes.
+                            svg.selectAll(".depth").sort(function(a, b) { return a.depth - b.depth; });
+
+                            // Fade-in entering text.
+                            g2.selectAll("text").style("fill-opacity", 0);
+
+                            // Transition to the new view.
+                            t1.selectAll("text").call(text).style("fill-opacity", 0);
+                            t2.selectAll("text").call(text).style("fill-opacity", 1);
+                            t1.selectAll("rect").call(rect);
+                            t2.selectAll("rect").call(rect);
+
+                            // Remove the old node when the transition is finished.
+                            t1.remove().each("end", function() {
+                              svg.style("shape-rendering", "crispEdges");
+                              transitioning = false;
+                            });
+                          }
+
+                          return g;
+                        }
+
+                        function text(text) {
+                          text.attr("x", function(d) { return x(d.x) + 6; })
+                              .attr("y", function(d) { return y(d.y) + 6; });
+                        }
+
+                        function rect(rect) {
+                          rect.attr("x", function(d) { return x(d.x); })
+                              .attr("y", function(d) { return y(d.y); })
+                              .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+                              .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+                        }
+
+                        function name(d) {
+                          return d.parent
+                              ? name(d.parent) + "." + d.name
+                              : d.name;
+                        }
+                      });
+
+}
 
 
 
