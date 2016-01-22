@@ -117,7 +117,7 @@ function modelData(r){
             var tempFee = checkForNumber(item.price);
             totalSpend+=tempFee;
                var displayFee = tempFee;
-                displayFee == 0 ? displayFee = item.price : displayFee = myRound(tempFee, 2 )+"m";
+                displayFee == 0 ? displayFee = item.price : displayFee = myRound(tempFee, 2 );
                 item.displayFee = displayFee;
 
 
@@ -312,7 +312,7 @@ function buildTreeJson(data) {
                   obj.size = data[i]["size"]
                   obj.value = data[i]["size"]
                   obj.totalCost = data[i]["totalCost"]
-                  obj.displayFee = myRound(obj.totalCost)+"m"
+                  obj.displayFee = myRound(obj.totalCost)
                   obj.tintColor = hex
                   obj.children = tempGrandChildren;
 
@@ -365,45 +365,40 @@ function checkForStarStr(obj){
 function getTreeMapDetails(d){
 
   var v=globalSortVar;
-  var a = d.children;
+  var a = d._children;
   var clubSellArr = getClubSells(a[0].buyClub);
 
   console.log(clubSellArr)
 
 
 
-  var htmlStr = "";
+  var htmlStr = "<h4 style='margin:0'>Buy</h4><p>";
 
   _.each(a, function(item,i){
-
- 
-      htmlStr+="<h3>"+item.name+"</h3>";
-      htmlStr+="<p>Fee: <strong>"+item.displayFee+"</strong></p>";
-      htmlStr+="<p>Posititon: <strong>"+getPostionString(item.position)  +"</strong></p>";
-      htmlStr+="<p>From: <strong>"+item.sellClub+"</strong></p>"; 
-
+      htmlStr+="<b>"+item.name+"</b> £"+item.displayFee+"m, "+getPostionString(item.position) +", from "+item.sellClub; 
+      
       if(i + 1 != a.length) {
-        htmlStr+="<footer></footer>";
+        htmlStr+="; ";
         
     }
-  
   })
+     
+     htmlStr += "</p>";
+
+     console.log(htmlStr)
 
   document.getElementById("treeMapDetailBuy").innerHTML = htmlStr;
 
-  var htmlStr = "";
+  var htmlStr = "<h4 style='margin:0'>Sell</h4><p>";
+
 
   _.each(clubSellArr, function(item,i){
-      htmlStr+="<h3>"+item.playername+"</h3>";
-      htmlStr+="<p>Fee: <strong>"+item.displayFee+"</strong></p>";
-      htmlStr+="<p>Posititon: <strong>"+getPostionString(item.position)  +"</strong></p>";
-      htmlStr+="<p>To: <strong>"+item.to+"</strong></p>"; 
-
+      htmlStr+="<b>"+item.playername+"</b> £"+item.displayFee+"m, "+getPostionString(item.position) +", to "+item.to; 
+      
       if(i + 1 != a.length) {
-        htmlStr+="<footer></footer>";
+        htmlStr+="; ";
         
     }
-  
   })
 
 
@@ -634,7 +629,7 @@ function addListeners(){
 
 function checkWinSize(){
 
-    console.log(interactiveContainer.offsetWidth);
+    addD3Tree(dataJSON)
 
     // var wideNumIn = w;
 
@@ -681,9 +676,6 @@ function buildTopBuyView(a){
   })
 
   document.getElementById("topBuyContent").innerHTML = htmlStr;
-
-
-  
 }
 
 function getPosition(element) {
@@ -730,7 +722,7 @@ function myRound(num,decimals) {
     num = (num/1000000)
     var newNum = num.toFixed(1);
     num = (newNum*1)+0;
-    return sign +(num);
+    return (num);
 }
 
 
@@ -740,40 +732,7 @@ function scrollPage(d){
 }
 
 
-function zoomToDetailView(d, currClip, h) { 
-  
-  document.getElementById("detailView").style.display="block";
 
-
-
-
- 
-  // var offset = $(currClip).offset();
-  // globalOffsetClip = $(currClip); 
-  // var newTop = (offset.top + $(currClip).height());
-  // var newLeft = offset.left;
-  var newArr = getDetailArray(d.name, globalSortVar);
-
-  setDetailView(newArr, globalSortVar, d, currClip, h);
-
-
-
-
-  //     $("#detail-view").show().css({
-  //       opacity : 0
-  //     });
-
-
-
-
-  //     $("#treemapView").css({
-  //       height : ($(currClip).height() + parseInt($(currClip).css('top'), 10) ) + 'px'
-  //     });
-
-      
-
-  
-}
 
  function getStarMan(d){
   var obj;
@@ -859,112 +818,18 @@ function getPostionString(strIn){
 
 }
 
-function setDetailView(arrIn,strIn,d, c, h){
 
-
-    var starPlayerInfo = getStarMan(d);
-    var htmlStrR = "";
-    var htmlStrC = "";
-    var totalFees = 0;
-    var checkStarName = starPlayerInfo.nameofplayer;
-    var starPlayerFormatName = starPlayerInfo.nameofplayer;
-    var spendStr = getSpendStr(strIn);
-
-    starPlayerFormatName = starPlayerFormatName.replace(/\s+/g, '&nbsp;');
-   
-    strIn == "Total spending" ? document.getElementById("detailHeader").innerHTML ="Total spending" :  document.getElementById("detailHeader").innerHTML = (getPostionString(arrIn[0][strIn]));
-   
-
-        _.each(arrIn, function(item) {
-
-            var tempFee = checkForNumber(item.price);
-            var displayFee = tempFee;
-            displayFee == 0 ? displayFee = item.price : displayFee = myRound(tempFee, 2 )+"m";
-
-
-            if(checkStarName==item.playername){
-              
-              var starStr="";
-              starStr+="<h3>"+item.playername+" <span style='font-weight:200; font-size:80%'>(pictured above)</span></h3>";
-              starStr+="<p>";
-              if(strIn=="previousleague" && arrIn[0][strIn]=="Other leagues"){
-                    starStr+="Previous&nbsp;league:&nbsp;"+item.displayPreviousLeague+". <br/>";
-              }
-
-              if(strIn=="nationality" && arrIn[0][strIn]=="Other countries"){
-                  htmlStrR+="Nationality:&nbsp;"+item.displayNationality+"</br>";
-              }
-
-              starStr+=displayFee+". To "+item.to+" from "+item.from;
-              starStr+="<br/>Position:&nbsp;"+getPostionString(item.position).toLowerCase()+". ";
-              starStr+="Age:&nbsp;"+item.age+". "; 
-
-              if(arrIn[0][strIn]!="Other countries"){
-              starStr+="Nationality:&nbsp;"+item.displayNationality+"</p>";
-              }
-
-              // get the starman at the top of htmlStrR even if the starMan is in middle of arrin
-              htmlStrR=starStr+" "+htmlStrR;
-
-            }
-
-
-            
-            if(checkStarName!=item.playername){
-              htmlStrR+="<h3>"+item.playername+"</h3>";
-              htmlStrR+="<p>";
-
-              if(strIn=="previousleague" && arrIn[0][strIn]=="Other leagues"){
-                    htmlStrR+="Previous&nbsp;league:&nbsp;"+item.displayPreviousLeague+". <br/>";
-              }
-
-              if(strIn=="nationality" && arrIn[0][strIn]=="Other countries"){
-                    htmlStrR+="Nationality:&nbsp;"+item.displayNationality+"</br>";
-              }
-
-              htmlStrR+=displayFee+". To "+item.to+" from "+item.from;
-              htmlStrR+="<br/>Position:&nbsp;"+getPostionString(item.position)+". ";
-              htmlStrR+="Age:&nbsp;"+item.age+". ";
-
-              if(arrIn[0][strIn]!="Other countries"){
-                    htmlStrR+="Nationality:&nbsp;"+item.displayNationality+"</p>";
-              }
-            }
-            
-            totalFees+=tempFee;
-
-          })
-        htmlStrR="<div id='starManContainer'><div id='starManPic' style='background-image: url("+starPlayerInfo.imageurl+"/500.jpg)'></div><div id='transferList'>"+htmlStrR+"</div>";
-
-        htmlStrR+="<br/><div class='styled-select'><button id='back-to-top'>back to top of interactive</button></div>";
-        // 
-
-
-      
-        document.getElementById("centerPanel").innerHTML = htmlStrR;
-
-        if(arrIn[0][strIn]=="Other leagues" || arrIn[0][strIn]=="Other countries"){
-          document.getElementById("leftPanel").innerHTML = " ";
-        }else{
-           document.getElementById("leftPanel").innerHTML = "<div class='large-number-left'>"+myRound(totalFees, 2 )+"<span class='large-number-left-M'>m</span></div><div class='number-caption'>"+spendStr+"</div>";
-        }
-        
-        
-        treemapPosition(c,h);
-      
-
-}
 
 
 
 
 function addD3Tree(dataJSON){
-
+      document.getElementById("treemapFlex").innerHTML = "";
           console.log(dataJSON)
 
                       var margin = {top: 20, right: 0, bottom: 0, left: 0},
-                          width = 960,
-                          height = 500 - margin.top - margin.bottom,
+                          width = d3.select("#treemapFlex").node().getBoundingClientRect().width,
+                          height = width * 0.48,
                           formatNumber = d3.format(",d"),
                           transitioning;
 
@@ -1002,6 +867,7 @@ function addD3Tree(dataJSON){
                       grandparent.append("text")
                           .attr("x", 6)
                           .attr("y", 6 - margin.top)
+                          .attr("class", "cellLabel")
                           .attr("dy", ".75em");
 
                       d3.json(dataJSON, function() {
@@ -1055,7 +921,8 @@ function addD3Tree(dataJSON){
                               .datum(d.parent)
                               .on("click", transition)
                             .select("text")
-                              .text(name(d));
+                              .text(name(d))
+                              .attr("class", "cellLabel");
 
                           var g1 = svg.insert("g", ".grandparent")
                               .datum(d)
@@ -1084,7 +951,17 @@ function addD3Tree(dataJSON){
                           g.append("text")
                               .attr("dy", ".75em")
                               .text(function(d) { return d.name; })
+                              .attr("class", "cellLabel")
                               .call(text);
+
+                           g.append("text")
+                              .attr("dy", "1.3em")
+                              .text(function(d) { return d.displayFee; })
+                              .attr("class", "cellLabelFee")
+                              .call(text);
+
+
+                              
 
                           function transition(d) {
                             if (transitioning || !d) return;
@@ -1118,6 +995,9 @@ function addD3Tree(dataJSON){
                               svg.style("shape-rendering", "crispEdges");
                               transitioning = false;
                             });
+                            resetTreeMapDetails()
+                            getTreeMapDetails(d)
+
                           }
 
                           return g;

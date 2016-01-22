@@ -1,4 +1,4 @@
-#chart{
+#treemapFlex{
     text {
       pointer-events: none;
       font-family: "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
@@ -11,7 +11,7 @@
     }
 
     rect {
-      fill: none;
+      fill: #ddd;
       stroke: #fff;
     }
 
@@ -40,6 +40,23 @@
 
     .children:hover rect.child {
       fill: #bbb;
+    }
+
+
+
+    .cellLabel {
+            font: 15px "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
+            line-height: 14px;
+            fill:#FFF;
+            stroke:none;
+            
+        }
+
+    .cellLabelFee{
+        font: 28px "Guardian Egyptian Web";
+        line-height: 14px;
+        fill:#FFF;
+        stroke:none;
     }
 }
 
