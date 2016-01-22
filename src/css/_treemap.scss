@@ -7,6 +7,36 @@
 
 }
 
+.tree-map-detail p{
+        margin:0;
+        padding:0;
+        font-family: "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        line-height:18px;
+}
+.tree-map-detail h2{
+        margin:0;
+        padding:0;
+        font-family: "Guardian Egyptian Web", Georgia, serif;
+        font-weight:500;
+        font-size: 24px;
+        line-height:28px;
+}
+
+.tree-map-detail h3{
+        margin:0;
+        padding:0;
+        font-family: "Guardian Egyptian Web", Georgia, serif;
+        font-weight:400;
+        font-size: 20px;
+        line-height:24px;
+}
+
+.tree-map-detail footer{
+        width:100%;
+        border-top: 1px solid #CCC;
+        margin-top: 12px;
+}
 
 #detail-view {
             position: relative;
