@@ -6,12 +6,18 @@
         line-height:18px;
     }
 
-    .grandparent text {
-      font-weight: bold;
+
+
+    .grandParentLabel{
+        font: 28px "Guardian Egyptian Web";
+        line-height: 14px;
+        fill:#222222;
+        stroke:none;
+        font-weight:500;
     }
 
     rect {
-      fill: #ddd;
+      fill: #005689;
       stroke: #fff;
     }
 
@@ -21,11 +27,12 @@
     }
 
     .grandparent rect {
-      fill: orange;
+      fill: white;
+      border-bottom: 1px solid #767676;
     }
 
     .grandparent:hover rect {
-      fill: #ee9700;
+      // fill: #ee9700;
     }
 
     .children rect.parent,
@@ -34,7 +41,7 @@
     }
 
     .children rect.parent {
-      fill: #bbb;
+      fill: #194377;
       fill-opacity: .5;
     }
 
@@ -51,13 +58,18 @@
             stroke:none;
             
         }
-
+       .grey{
+        fill:#CCC;
+       } 
     .cellLabelFee{
         font: 28px "Guardian Egyptian Web";
         line-height: 14px;
         fill:#FFF;
         stroke:none;
     }
+
+
+
 }
 
 
@@ -221,4 +233,11 @@ text {
 rect {
   fill: none;
 }
-            
+    
+.buy{
+
+    }
+
+    .sell{
+        fill-opacity:0.25;
+    }            

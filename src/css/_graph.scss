@@ -3,7 +3,7 @@ $highlight-color: map-get($pasteup-palette, 'news-main-1');
 .gv-holder-div {
     position: relative;
     width: 100%;
-    max-width: 720px;
+    max-width: 960px;
 }
     
 .gv-graph-axis{
@@ -12,7 +12,7 @@ $highlight-color: map-get($pasteup-palette, 'news-main-1');
   left:0;
   width:100%;
   height:100%;
-  max-width:720px;
+  max-width:900px;
   z-index:0;
    @include fs-textSans(2);
 }
@@ -106,3 +106,14 @@ tr.spaceBelow > td
  .plague-bar{
    background-color: $highlight-color;
  }
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}

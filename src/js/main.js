@@ -15,7 +15,7 @@ var totalSpend = 0;
 var shareFn = share('Guardian football transfer window', 'http://gu.com/p/URL', '#Interactive');
 var premClubsArr = [];
 var colorsArr = [];
-var allTransfersArr, myCutsIndex, treeJson, playerCountArray, rootJSON, parseData, dataset, starData, leaguesArray, nationalitiesArray, sellArr, gotoPosition;
+var allTransfersArr, treeJson, playerCountArray, rootJSON, parseData, dataset, starData, leaguesArray, nationalitiesArray, sellArr, gotoPosition;
 var myView = false;
 
 
@@ -221,8 +221,11 @@ function filterArray(a,q,v){
 }
 
 function filterTreeMap(varIn){
+  
   globalSortVar=varIn;
+  
   document.getElementById("detailView").style.display="none";
+
       var playerCount = getCountByProperty(dataset, varIn);
         
            playerCountArray = _.map(playerCount, function(val, key, list) {
@@ -258,6 +261,8 @@ function filterTreeMap(varIn){
         rootJSON = buildTreeJson(playerCountArray);
         document.getElementById('treemapView').innerHTML = "";
         buildTreeMap(rootJSON);
+
+
         //checkWinSize(winW);
 }
 
@@ -282,41 +287,99 @@ function setCellLabels(d,dir){
 
 function buildTreeJson(data) {
     var r = {}, i, obj;
-    r.name = "root";
+    r.name = "Showing all clubs";
     r.children = [];
+
+    var allDealsArr = [];
     var hex;
-   for ( i = 0; i < data.length; i++) {
-          var tempGrandChildren = [];
+    var totalCost;
+    var allSalesCost = 0;
+    var allBuysCost = 0;
+    
+    for ( i = 0; i < data.length; i++) {
+          var buyGrandChildren = [];
+
 
           _.each(dataset, function(item,k){
                 if (item.to == data[i]["name"]){
-                  console.log(item)
-
                   var grandChild = {};
                   grandChild.tintColor = item.hex;
                   grandChild.name = item.playername;
+                  grandChild.price = checkForNumber(item.price)
                   grandChild.size = checkForNumber(item.price) + 1000000
                   grandChild.value = checkForNumber(item.price) + 1000000
                   grandChild.displayFee = item.displayFee 
                   grandChild.buyClub = item.to 
                   grandChild.sellClub = item.from 
-                  grandChild.position = item.position 
-                  tempGrandChildren.push(grandChild)
+                  grandChild.position = item.position
+                  grandChild.buySell = getBuySell(data[i].name, item.to)
+                  buyGrandChildren.push(grandChild)
                   hex = item.hex;
                 }
             })
 
-               
+        var sellGrandChildren = [];
+            
+            _.each(dataset, function(item,k){
+                if (item.from == data[i]["name"]){
+                  var grandChild = {};
+                  grandChild.tintColor = item.hex;
+                  grandChild.name = item.playername;
+                  grandChild.price = checkForNumber(item.price)
+                  grandChild.size = checkForNumber(item.price) + 1000000
+                  grandChild.value = checkForNumber(item.price) + 1000000
+                  grandChild.displayFee = item.displayFee 
+                  grandChild.buyClub = item.to 
+                  grandChild.sellClub = item.from 
+                  grandChild.position = item.position
+                  grandChild.buySell = getBuySell(data[i].name, item.to)
+                  sellGrandChildren.push(grandChild)
+                  hex = item.hex;
+                }
+            })     
+
+           
+
+            var buyFigure = 0;
+            _.each(buyGrandChildren, function(item){
+                  if(item.buySell == "buy"){ 
+                    buyFigure += checkForNumber(item.price)
+                    allBuysCost += checkForNumber(item.price) 
+                  }
+            })
+
+            data[i].buyCost = buyFigure;
+
+
+            var sellFigure = 0;
+            _.each(sellGrandChildren, function(item){
+                  if(item.buySell == "sell"){ 
+                      sellFigure += checkForNumber(item.price); 
+                      allSalesCost+= checkForNumber(item.price);
+                  }
+            })
+
+            data[i].sellCost = sellFigure;
+
                   obj = {};
                   obj.name = data[i]["name"];
-                  obj.size = data[i]["size"]
-                  obj.value = data[i]["size"]
+                  obj.size = data[i]["size"] + data[i].salesCost;
+                  obj.value = data[i]["size"]  + data[i].salesCost
                   obj.totalCost = data[i]["totalCost"]
+                  obj.buyCost = data[i].buyCost;
+                  obj.sellCost = data[i].sellCost;
+
                   obj.displayFee = myRound(obj.totalCost)
+                  obj.balanceCost = obj.buyFigure - obj.totalCost;
+                  obj.grossCost = obj.buyFigure + obj.totalCost;
+
                   obj.tintColor = hex
-                  obj.children = tempGrandChildren;
+                  obj.children = buyGrandChildren;
+                  obj.sellChildren = sellGrandChildren;
 
             r.children.push(obj);
+            r.allSalesCost = allSalesCost;
+            r.allBuysCost = allBuysCost;
        
         }
 
@@ -325,6 +388,11 @@ function buildTreeJson(data) {
     return r;
 }
 
+function getBuySell(v1, v2){
+  var s;
+  v1 == v2 ? s = "buy" : s = "sell";
+  return s;
+}
 
 function size(d) {
   return d.size;
@@ -362,6 +430,16 @@ function checkForStarStr(obj){
 
 }
 
+function setFeeForDetail(v){
+  if (!isNaN(v)){
+    v = "£"+v+"m"
+  }
+
+  return v;
+
+}
+
+
 function getTreeMapDetails(d){
 
   var v=globalSortVar;
@@ -375,7 +453,7 @@ function getTreeMapDetails(d){
   var htmlStr = "<h4 style='margin:0'>Buy</h4><p>";
 
   _.each(a, function(item,i){
-      htmlStr+="<b>"+item.name+"</b> £"+item.displayFee+"m, "+getPostionString(item.position) +", from "+item.sellClub; 
+      htmlStr+="<b>"+item.name+"</b> "+setFeeForDetail(item.displayFee)+", "+getPostionString(item.position) +", from "+item.sellClub; 
       
       if(i + 1 != a.length) {
         htmlStr+="; ";
@@ -393,7 +471,7 @@ function getTreeMapDetails(d){
 
 
   _.each(clubSellArr, function(item,i){
-      htmlStr+="<b>"+item.playername+"</b> £"+item.displayFee+"m, "+getPostionString(item.position) +", to "+item.to; 
+      htmlStr+="<b>"+item.playername+"</b> "+setFeeForDetail(item.displayFee)+", "+getPostionString(item.position) +", to "+item.to; 
       
       if(i + 1 != a.length) {
         htmlStr+="; ";
@@ -406,8 +484,8 @@ function getTreeMapDetails(d){
 
 
 
-  setStarManDetail(d);
-  setDetailHead(d);
+ // setStarManDetail(d);
+    setDetailHead(d);
 }
 
 function setDetailHead(d){
@@ -416,7 +494,11 @@ function setDetailHead(d){
       htmlStr+="<p>Total spending: "+myRound(d.value)+"m</p>";
       htmlStr+="<footer></footer>"; 
 
-      document.getElementById("detailHead").innerHTML = htmlStr;
+      document.getElementById("grandParentText").innerHTML = d.name;
+      document.getElementById("grandParentStack").innerHTML = "Total spending: £"+myRound(d.value)+"m";
+
+      setBarChart(d)
+      //"£"+myRound(d.value)+"m"
 }
 
 function setStarManDetail(d){
@@ -426,7 +508,7 @@ function setStarManDetail(d){
     var htmlStr='<div class="gv-halo-image-holder" style="background: url('+starPlayerInfo.imageurl+'/500.jpg)"></div>'
     
 
-    document.getElementById("starDetail").innerHTML = htmlStr;
+    //document.getElementById("starDetail").innerHTML = htmlStr;
     
 }
 
@@ -439,8 +521,8 @@ function resetTreeMapDetails(){
 
     document.getElementById("treeMapDetailSell").innerHTML = " ";
     document.getElementById("treeMapDetailBuy").innerHTML = " ";
-    document.getElementById("starDetail").innerHTML = " "; 
-    document.getElementById("detailHead").innerHTML = htmlStr;
+    //document.getElementById("starDetail").innerHTML = " "; 
+    //document.getElementById("detailHead").innerHTML = htmlStr;
     
 }
 
@@ -824,10 +906,12 @@ function getPostionString(strIn){
 
 
 function addD3Tree(dataJSON){
-      document.getElementById("treemapFlex").innerHTML = "";
-          console.log(dataJSON)
 
-                      var margin = {top: 20, right: 0, bottom: 0, left: 0},
+  setBarChartVals(dataJSON)
+      document.getElementById("treemapFlex").innerHTML = "";
+          
+
+                      var margin = {top: 60, right: 0, bottom: 0, left: 0},
                           width = d3.select("#treemapFlex").node().getBoundingClientRect().width,
                           height = width * 0.48,
                           formatNumber = d3.format(",d"),
@@ -865,9 +949,16 @@ function addD3Tree(dataJSON){
                           .attr("height", margin.top);
 
                       grandparent.append("text")
-                          .attr("x", 6)
-                          .attr("y", 6 - margin.top)
-                          .attr("class", "cellLabel")
+                          .attr("x", 0)
+                          .attr("y", 0 - margin.top)
+                          .attr("class", "grandParentLabel")
+                          .attr("dy", ".75em");
+
+                      grandparent.append("text")
+                          .attr("x", 0)
+                          .attr("y", 30- margin.top)
+                          .attr("id","grandParentStack")
+                          .attr("class", "cellLabel grey")
                           .attr("dy", ".75em");
 
                       d3.json(dataJSON, function() {
@@ -917,12 +1008,16 @@ function addD3Tree(dataJSON){
                         }
 
                         function display(d) {
+                          var head = d3.select("#detailHead") 
+                              .on("click", transition)   
+
                           grandparent
                               .datum(d.parent)
                               .on("click", transition)
                             .select("text")
-                              .text(name(d))
-                              .attr("class", "cellLabel");
+                              .attr("id", "grandParentText")
+                              .text("Showing all clubs")
+                              .attr("class", "grandParentLabel");
 
                           var g1 = svg.insert("g", ".grandparent")
                               .datum(d)
@@ -939,11 +1034,14 @@ function addD3Tree(dataJSON){
                           g.selectAll(".child")
                               .data(function(d) { return d._children || [d]; })
                             .enter().append("rect")
-                              .attr("class", "child")
+                              .attr("class", "child ")
+                              .attr("class", function(d) { return "child "+(d.buySell); })
+                              .attr("fill","#aa0000")
                               .call(rect);
 
                           g.append("rect")
                               .attr("class", "parent")
+                              .attr("fill","#aa0000")
                               .call(rect)
                             .append("title")
                               .text(function(d) { return formatNumber(d.value); });
@@ -961,9 +1059,8 @@ function addD3Tree(dataJSON){
                               .call(text);
 
 
-                              
-
                           function transition(d) {
+                            updateBarChart(d)
                             if (transitioning || !d) return;
                             transitioning = true;
 
@@ -998,6 +1095,7 @@ function addD3Tree(dataJSON){
                             resetTreeMapDetails()
                             getTreeMapDetails(d)
 
+                            //document.getElementById("resetTreeMapDetails").innerHTML = "All spending";
                           }
 
                           return g;
@@ -1022,8 +1120,101 @@ function addD3Tree(dataJSON){
                         }
                       });
 
+  
+
 }
 
+var barMax;
+
+function setBarChartVals(d){
+ 
+    var barMin = 0;
+    barMax = Math.max(d.allSalesCost, d.allBuysCost); 
+    var barChart = d3.select("#barChart");
+
+
+    barChart.html("Hello world! "+barMax);
+
+    buildBarChart(d,barMin,barMax)
+}
+
+
+function buildBarChart(d,min,max){
+
+  var barChart = document.getElementById("barChart");
+  var width = barChart.offsetWidth;
+  var height = 480;
+  var unit = 1000000;
+  var onePc = 100/(max/unit);
+  var allSalesW = (d.allSalesCost/unit)*onePc;
+  var axisStr = '<div class="gv-graph-axis" style="margin-bottom:60px;">';
+
+  for (var k = 0; k < (max/unit); k+=10){
+      var labelStr;
+    
+      if(k == 0){
+        axisStr += '<span class="'+getAxisClass(k)+'" style="left: '+(k*onePc)+'%">£millions</span>'; 
+      }
+      if(k > 10){
+        axisStr += '<span class="'+getAxisClass(k)+'" style="left: '+(k*onePc)+'%">'+k+'</span>'; 
+      }
+      
+  }
+   axisStr += '</div>';
+
+   console.log(d)
+
+   var tableStr = '<table class="bars-data-table" id="spendingTable">'
+   tableStr +=  '<tbody><tr class="spaceAbove" ><td id="tableClub" style="padding-top:72px">Arsenal<br><span class="gv-definition-text" id="tableBalance">Balance: +£10m</span></td></tr>'
+   tableStr +=  '<tr><td><div class="bars-data-bar plague-bar" style="width: 10%;" id="clubBarBuys"></div></td></tr>'
+   tableStr +=  '<tr><td><div class="bars-data-bar plague-bar" style="width: 25%;" id="clubBarSales"></div></td></tr>'
+   tableStr +=  '<tr class="spaceAbove"><td>All clubs<br><span class="gv-definition-text">£250m</span></td></tr>' 
+   tableStr +=  '<tr><td><div class="bars-data-bar plague-bar" style="width: 100%;"></div></td></tr>'
+   tableStr +=  '<tr><td><div class="bars-data-bar plague-bar" style="width: '+allSalesW+'%; background:#194377 !important;"></div></td>'
+   tableStr +=  '</tr></tbody></table> '
+
+
+   var htmlStr = axisStr+tableStr;
+
+   barChart.innerHTML = htmlStr;
+
+//<span class="timeline__one" style="left: 0%; width: 16.666666666666668%">Spending £millions</span> 
+
+
+}
+
+function setBarChart(d){
+    var newPc = (d.buyCost/barMax)*100;
+
+    //document.getElementById('clubBarSales').width = newPc+"%";
+
+
+
+}
+
+function getAxisClass(k){
+  var c = "timeline__one";
+
+  if (k > 0){ c = "timeline__label"}
+
+  return c;
+}
+
+function updateBarChart(d){
+
+
+  if(d === "undefined"){
+      document.getElementById('tableClub').innerHTML = ' ';
+  }else{
+      var  n = checkForNumber(d.sellCost-d.buyCost)
+      document.getElementById('tableClub').innerHTML = d.name +'<br><span class="gv-definition-text" id="tableBalance">Balance:'+n+'</span>';
+      
+  }
+
+
+ 
+
+}
 
 
 
