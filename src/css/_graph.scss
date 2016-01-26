@@ -48,17 +48,18 @@ $highlight-color: map-get($pasteup-palette, 'news-main-1');
 .gv-definition-text{
     color: #767676;
     font-family: "Guardian Text Sans Web","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
-    font-size: 12px;
+    font-size: 15px;
+    line-height: 21px;
     font-weight: 400;
 }
 
  .bars-data-table{
    width:100%;
     max-width: 720px;
-    font-size: 16px;
-    line-height: 20px;
+    font-size: 15px;
+    line-height: 21px;
     font-family: "Guardian Egyptian Web",Georgia,serif;
-    font-weight: 500; 
+    font-weight: 400; 
     border-spacing: 0px;
     th { color: $neutral-1; }
     th:nth-child(even) {text-align:center; width:120px; padding: 3px 0 15px;}

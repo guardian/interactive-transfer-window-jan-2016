@@ -2,7 +2,7 @@
     text {
       pointer-events: none;
       font-family: "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
-        font-size: 14px;
+        font-size: 15px;
         line-height:18px;
     }
 
@@ -58,9 +58,12 @@
             stroke:none;
             
         }
-       .grey{
-        fill:#CCC;
+       .blue{
+        fill:#005689;
        } 
+    .grey{
+        fill:#CCC;
+       }
     .cellLabelFee{
         font: 28px "Guardian Egyptian Web";
         line-height: 14px;
@@ -86,8 +89,15 @@
         margin:0;
         padding:0;
         font-family: "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
-        font-size: 14px;
+        font-size: 15px;
         line-height:18px;
+
+         @include mq(tablet) {
+            font-family: "Guardian Egyptian Web", Georgia, serif;
+            font-size: 18px;
+            line-height:24px;
+         }
+    
 }
 .tree-map-detail h2{
         margin:0;

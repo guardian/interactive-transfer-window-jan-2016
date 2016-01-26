@@ -14,7 +14,6 @@ $highlight-color: map-get($pasteup-palette, 'news-main-1');
 h4{
   font-weight:500 !important;
 }
-    
 
 
 .timeline__label {
@@ -48,14 +47,14 @@ h4{
 .gv-definition-text{
     color: #767676;
     font-family: "Guardian Text Sans Web","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
 }
 
  .bars-data-table{
    width:100%;
     max-width: 900px;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 20px;
     font-family: "Guardian Egyptian Web",Georgia,serif;
     font-weight: 500; 
@@ -105,4 +104,12 @@ tr.spaceBelow > td
  
  .plague-bar{
    background-color: $highlight-color;
+ }
+
+.buy-list-item, .sell-list-item{
+    color:#DDD !important;
+}
+
+ .highlight-cell{
+    color:#005689 !important;
  }
