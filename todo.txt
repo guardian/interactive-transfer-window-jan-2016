@@ -1,2 +1,24 @@
 Add sale figues around line 127
 // add sales to each object here or in getPlayerArr
+
+
+
+TREEMAP
+1. Colors not great
+2. Treemap slice on mobile view
+3. Text overflowing on small screens
+
+OTHER
+1. Get data in to featured signings at top
+	a - use the most expensive signings for now
+
+2. CSS needs a major check, view the page in composer
+
+3. Make a decision on bottom graph/table
+	a - add headline figures for each club (look at tsunami ia)
+	b - move it to top of section 
+	c - remove it
+	d - pie charts
+
+
+DO THE OTHER section first
