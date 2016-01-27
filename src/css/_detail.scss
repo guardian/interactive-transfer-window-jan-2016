@@ -1,9 +1,16 @@
+.gv-interactive-container {
+
 $highlight-color: map-get($pasteup-palette, 'news-main-1');
 
 .gv-detail-view{
   position:absolute;
   width:100%;
   background:#FFF;
+
+  p{
+    width:100%;
+    max-width:680px;
+  }
 }
 
 .gv-holder-div {
@@ -111,5 +118,7 @@ tr.spaceBelow > td
 }
 
  .highlight-cell{
-    color:#005689 !important;
+    color:#767676 !important;
  }
+
+}

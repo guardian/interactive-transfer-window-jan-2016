@@ -1,3 +1,5 @@
+.gv-interactive-container {
+
 $highlight-color: map-get($pasteup-palette, 'news-main-1');
 
 .gv-holder-div {
@@ -117,4 +119,6 @@ tr.spaceBelow > td
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
+}
+
 }

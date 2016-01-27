@@ -1,3 +1,5 @@
+.gv-interactive-container {
+
 #treemapFlex{
     text {
       pointer-events: none;
@@ -9,7 +11,7 @@
 
 
     .grandParentLabel{
-        font: 28px "Guardian Egyptian Web";
+        font: 20px "Guardian Egyptian Web";
         line-height: 14px;
         fill:#222222;
         stroke:none;
@@ -58,7 +60,7 @@
             stroke:none;
             
         }
-       .blue{
+    .blue{
         fill:#005689;
        } 
     .grey{
@@ -91,6 +93,8 @@
         font-family: "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
         font-size: 15px;
         line-height:18px;
+        width:100%;
+        max-width: 680px;
 
          @include mq(tablet) {
             font-family: "Guardian Egyptian Web", Georgia, serif;
@@ -99,23 +103,23 @@
          }
     
 }
-.tree-map-detail h2{
-        margin:0;
-        padding:0;
-        font-family: "Guardian Egyptian Web", Georgia, serif;
-        font-weight:500;
-        font-size: 24px;
-        line-height:28px;
-}
+// .tree-map-detail h2{
+//         margin:0;
+//         padding:0;
+//         font-family: "Guardian Egyptian Web", Georgia, serif;
+//         font-weight:500;
+//         font-size: 24px;
+//         line-height:28px;
+// }
 
-.tree-map-detail h3{
-        margin:0;
-        padding:0;
-        font-family: "Guardian Egyptian Web", Georgia, serif;
-        font-weight:400;
-        font-size: 20px;
-        line-height:24px;
-}
+// .tree-map-detail h3{
+//         margin:0;
+//         padding:0;
+//         font-family: "Guardian Egyptian Web", Georgia, serif;
+//         font-weight:400;
+//         font-size: 20px;
+//         line-height:24px;
+// }
 
 .tree-map-detail footer{
         width:100%;
@@ -250,4 +254,6 @@ rect {
 
     .sell{
         fill-opacity:0.25;
-    }            
+    }   
+
+}         
