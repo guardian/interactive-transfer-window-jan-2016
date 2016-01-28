@@ -20,5 +20,13 @@ OTHER
 	c - remove it
 	d - pie charts
 
+V2
+1. Add sell data to treemap
+	-Look at adding this to children in rootJSON
+	-In d3 function give this a different visual treatment, consider using 2 shades throughout to show this consistently
+2. reinstate filter so that user can select nationalities etc
+	-This should be done by passing a variable from the filter and regenerating the rootJSON data accordingly.
+		Will need to give the rootJSON a more generic name than “All clubs” 
+
 
 DO THE OTHER section first

@@ -115,7 +115,19 @@ function modelData(r){
         
         starData = r.sheets.Star_Men;
 
-        var topBuyArr = filterArray(starData,"topbuy","y");
+        var topBuyArr = filterArray( starData,"topbuy","y" );
+
+        _.each(topBuyArr, function(item){
+              var obj = {};
+              
+              _.each(dataset, function(d){
+                  if (d.playername == item.nameofplayer)
+                   item.dataObj = d;
+              })
+
+        })
+
+        console.log(topBuyArr)
 
         _.each(dataset, function(item){
             var tempFee = checkForNumber(item.price);
@@ -123,7 +135,7 @@ function modelData(r){
                var displayFee = tempFee;
                 displayFee == 0 ? displayFee = item.price : displayFee = myRound(tempFee, 2 );
                 item.displayFee = displayFee;
-                item.name = item.playername;
+                item.name = item.playername.trim();
                 item.buyClub = item.to;
                 item.sellClub = item.from;
 
@@ -281,21 +293,12 @@ function filterTreeMap(varIn){
       
            
         rootJSON = buildTreeJson(playerCountArray);
-        document.getElementById('treemapView').innerHTML = "";
-        buildTreeMap(rootJSON);
+      
+        addD3Tree(rootJSON);
 }
 
 
 //BEGIN ZOOMER
-
-
-
-function buildTreeMap(dataJSON){
-  document.getElementById("treemapFlex").innerHTML = " ";
-  addD3Tree(dataJSON)
-  
- 
-}
 
 
 function setCellLabels(d,dir){
@@ -724,7 +727,7 @@ function addListeners(){
 
   var interactiveContainer = document.getElementById("interactiveContainer");
        
- window.addEventListener('resize', function() {setTimeout(checkWinSize, 1000); }, true);
+ window.addEventListener('resize', function() {setTimeout(checkWinSize, 2000); }, true);
         
 
   document.getElementById("filterDropdown").addEventListener('change', filterChanged);
@@ -784,11 +787,12 @@ function buildTopBuyView(a){
   var htmlStr = "";
 
   _.each(a, function (item,i){
+    console.log(item)
     htmlStr+= '<div class="gv-halo-column">'
-    htmlStr+= '<h2 class="gv-halo-head">'+item.nameofplayer+'</h2>'
+    htmlStr+= '<p><strong>'+item.nameofplayer+'</strong></>'
     htmlStr+= '<div class="gv-halo-image-holder" style="background: url('+item.imageurl+'/500.jpg)">'
     htmlStr+= '</div>'  
-    htmlStr+= '<h5 class="gv-halo-cap-head">words here</h5>'
+    htmlStr+= '<p><strong>'+setFeeForDetail(item.dataObj.displayFee)+'</strong>, to '+item.dataObj.buyClub+' from '+item.dataObj.sellClub+'</p>'
     htmlStr+= '</div>'
   })
 
@@ -843,12 +847,7 @@ function myRound(num,decimals) {
 }
 
 
-
-
-
-
-
- function getStarMan(d){
+function getStarMan(d){
   var obj;
 
   _.each(starData, function(one){
@@ -943,6 +942,7 @@ function getTreeMapH(w){
 
 function addD3Tree(dataJSON){
 
+
   setBarChartVals(dataJSON)
       document.getElementById("treemapFlex").innerHTML = "";
           
@@ -1021,7 +1021,7 @@ function addD3Tree(dataJSON){
                           .attr("x", 24)
                           .attr("y", 45  - margin.top)
                           .attr("id","grandParentButtonLabel")
-                          .text("All clubs")
+                          .text("show all clubs")
                           .attr("class", "cellLabel")
                           .attr("dy", ".75em");  
 
@@ -1192,10 +1192,7 @@ function updateTreeLayout (w,h)
       
       rootJSON = buildTreeJson(playerCountArray);
       document.getElementById('treemapFlex').innerHTML = "";
-      buildTreeMap(rootJSON);
-     
-
-      console.log(rootJSON) 
+      buildTreeMap(rootJSON); 
       setTreeMapDetails(rootJSON);
 
 }
