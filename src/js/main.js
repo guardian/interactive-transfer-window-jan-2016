@@ -79,7 +79,6 @@ var premClubs= [ {name:'Arsenal', hex:'#000000'},
 
 export function init(el, context, config, mediator) {
 
-
     el.innerHTML = mainHTML.replace(/%assetPath%/g, config.assetPath);
 
     reqwest({
@@ -100,7 +99,7 @@ export function init(el, context, config, mediator) {
 
 function injectTreeMapFrame(r){
     document.getElementById('treemapFlex').innerHTML = treemapHTML;
-
+    
     modelData(r);
 }
 
@@ -126,8 +125,6 @@ function modelData(r){
               })
 
         })
-
-        console.log(topBuyArr)
 
         _.each(dataset, function(item){
             var tempFee = checkForNumber(item.price);
@@ -294,10 +291,12 @@ function filterTreeMap(varIn){
            
         rootJSON = buildTreeJson(playerCountArray);
       
-        addD3Tree(rootJSON);
+        buildTreeMap(rootJSON);
 }
 
-
+function buildTreeMap(dataJSON){
+  addD3Tree(dataJSON)
+}
 //BEGIN ZOOMER
 
 
@@ -483,7 +482,7 @@ function setTreeMapDetails(d){
 
 function setTreeMapDetailBuy(a,c){
    
-  var htmlStr = "<p style='margin:0; display:inline; width:100%; max-width:680px'>";
+  var htmlStr = "<h4 style='margin:0; padding:0'>Players in</h4><p style='margin:0; display:inline; width:100%; max-width:680px'>";
 
         _.each(a, function(item,i){
           var spanClass = c;
@@ -505,7 +504,7 @@ function setTreeMapDetailBuy(a,c){
 
 function setTreeMapDetailSell(a,c){
 
-  var htmlStr = "<p style='margin:0; display:inline;'> ";
+  var htmlStr = "<h4 style='margin:0; padding:0'>Players out</h4><p style='margin:0; display:inline;'> ";
           _.each(a, function(item,i){
 
 
@@ -787,7 +786,6 @@ function buildTopBuyView(a){
   var htmlStr = "";
 
   _.each(a, function (item,i){
-    console.log(item)
     htmlStr+= '<div class="gv-halo-column">'
     htmlStr+= '<p><strong>'+item.nameofplayer+'</strong></>'
     htmlStr+= '<div class="gv-halo-image-holder" style="background: url('+item.imageurl+'/500.jpg)">'
@@ -1187,12 +1185,14 @@ function addD3Tree(dataJSON){
 
 }
 
-function updateTreeLayout (w,h) 
-{
-      
+function updateTreeLayout(w,h) 
+{ 
       rootJSON = buildTreeJson(playerCountArray);
-      document.getElementById('treemapFlex').innerHTML = "";
-      buildTreeMap(rootJSON); 
+      
+      //console.log(w)
+      //w > 741 ? buildTreeMap(rootJSON) : mobileTreeMap(rootJSON, w, h);
+
+      buildTreeMap(rootJSON)
       setTreeMapDetails(rootJSON);
 
 }
