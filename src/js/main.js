@@ -973,7 +973,7 @@ function addD3Tree(dataJSON){
                           
                           .ratio(1)
                           .sticky(false)
-                          .mode("slice-dice")
+                          .mode("squarify")
                           .round(false)
                           .sort(function(a, b) { return a.value - b.value; })
                           .children(function(d, depth) { return depth ? null : d._children; })
