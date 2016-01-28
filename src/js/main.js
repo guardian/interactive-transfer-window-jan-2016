@@ -482,7 +482,7 @@ function setTreeMapDetails(d){
 
 function setTreeMapDetailBuy(a,c){
    
-  var htmlStr = "<h4 style='margin:0; padding:0'>Players in</h4><p style='margin:0; display:inline; width:100%; max-width:680px'>";
+  var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players in</span><p style='margin:0; display:inline; width:100%; max-width:680px'>";
 
         _.each(a, function(item,i){
           var spanClass = c;
@@ -504,7 +504,7 @@ function setTreeMapDetailBuy(a,c){
 
 function setTreeMapDetailSell(a,c){
 
-  var htmlStr = "<h4 style='margin:0; padding:0'>Players out</h4><p style='margin:0; display:inline;'> ";
+  var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players out</span><p style='margin:0; display:inline;'> ";
           _.each(a, function(item,i){
 
 
@@ -532,14 +532,14 @@ function setDetailHead(d){
           if (d.name!="All premier league clubs"){ 
               document.getElementById("grandParentButton").style.display = "inline-block"; 
           }
-          
-          if(document.getElementById("grandParentText")){
-                document.getElementById("grandParentText").innerHTML = d.name +" total spending: £"+myRound(d.buyCost)+"m";
-                document.getElementById("grandParentStack").innerHTML = " ";
-        }
-      }
-      
 
+            var  n = checkForNumber(d.sellCost-d.buyCost)
+
+                document.getElementById("detailClubname").innerHTML = d.name;
+                document.getElementById("detailBalance").innerHTML = "£"+myRound(n)+"m";
+                document.getElementById("detailSpending").innerHTML = "£"+myRound(d.buyCost)+"m";
+                document.getElementById("detailSales").innerHTML = "£"+myRound(d.sellCost)+"m"; 
+      }
 }
 
 function setStarManDetail(d){
@@ -940,11 +940,11 @@ function getTreeMapH(w){
 
 function addD3Tree(dataJSON){
 
+  //setBarChartVals(dataJSON);
 
-  setBarChartVals(dataJSON)
       document.getElementById("treemapFlex").innerHTML = "";
           
-                      var margin = {top: 72, right: 0, bottom: 0, left: 0},
+                      var margin = {top: 36, right: 0, bottom: 0, left: 0},
                           width = d3.select("#treemapFlex").node().getBoundingClientRect().width,
                           height = getTreeMapH(width),
                           formatNumber = d3.format(",d"),
@@ -968,11 +968,10 @@ function addD3Tree(dataJSON){
                           .style("shape-rendering", "crispEdges");
 
                       treemap = d3.layout.treemap()
-                          
-                          
+                          //.size([width,300])
                           .ratio(3)
                           .sticky(false)
-                          .mode("squarify")
+                          //.mode("dice")
                           .round(false)
                           .sort(function(a, b) { return a.value - b.value; })
                           .children(function(d, depth) { return depth ? null : d._children; })
@@ -983,32 +982,19 @@ function addD3Tree(dataJSON){
                           .attr("class", "grandparent");
 
                       grandparent.append("rect")
-                          .attr("y", -margin.top)
+                          .attr("y", 0-margin.top)
                           .attr("width", width)
                           .attr("height", margin.top);
-
-                      grandparent.append("text")
-                          .attr("x", 0)
-                          .attr("y", 12 - margin.top)
-                          .attr("class", "grandParentLabel")
-                          .attr("dy", ".75em");
-
-                      grandparent.append("text")
-                          .attr("x", 0)
-                          .attr("y", 36- margin.top)
-                          .attr("id","grandParentStack")
-                          .attr("class", "cellLabel grey")
-                          .attr("dy", ".75em");
 
                     var grandParentButtonGroup = grandparent.append("g")    
                           .attr("id","grandParentButton")
                           .style("display","none")
                           .attr("x", 0)
-                          .attr("y", 0) 
+                          .attr("y",-36) 
 
                        grandParentButtonGroup.append("rect")
                           .attr("x", 0)
-                          .attr("y", 39  - margin.top) 
+                          .attr("y", -36) 
                           .attr("width", "120px")
                           .attr("height", "24px")
                           .attr("class","back-button")
@@ -1017,7 +1003,7 @@ function addD3Tree(dataJSON){
 
                       grandParentButtonGroup.append("text")
                           .attr("x", 24)
-                          .attr("y", 45  - margin.top)
+                          .attr("y", -30)
                           .attr("id","grandParentButtonLabel")
                           .text("show all clubs")
                           .attr("class", "cellLabel")
@@ -1077,10 +1063,6 @@ function addD3Tree(dataJSON){
                           grandparent
                               .datum(d.parent)
                               .on("click", transition)
-                            .select("text")
-                              .attr("id", "grandParentText")
-                              .text("All premier league clubs")
-                              .attr("class", "grandParentLabel");
 
                           var g1 = svg.insert("g", ".grandparent")
                               .datum(d)
@@ -1123,7 +1105,7 @@ function addD3Tree(dataJSON){
 
 
                           function transition(d) {
-                            updateBarChart(d)
+                            //updateBarChart(d)
                             if (transitioning || !d) return;
                             transitioning = true;
 
@@ -1188,6 +1170,8 @@ function addD3Tree(dataJSON){
 function updateTreeLayout(w,h) 
 { 
       rootJSON = buildTreeJson(playerCountArray);
+
+      console.log(rootJSON)
       
       //console.log(w)
       //w > 741 ? buildTreeMap(rootJSON) : mobileTreeMap(rootJSON, w, h);

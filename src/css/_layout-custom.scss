@@ -46,4 +46,42 @@
     padding-bottom:100%;
 }
 
+.gv-headline-text{
+    position:relative;
+    width:100%;
+    margin:0;
+    padding:0;
+    display:block;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: #767676;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+.gv-headline-figure{
+    position:relative;
+    width:100%;
+    margin-top:18px;
+    display:block;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-size: 60px;
+    font-weight: 200;
+    color: #767676;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gv-headline-cap {
+    position:relative;
+    width:100%;
+    display:block;  
+    font-family: "Guardian Text Sans Web",Georgia,serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #767676;
+    -webkit-font-smoothing: antialiased;
+
+}
+
 }
