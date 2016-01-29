@@ -47,6 +47,12 @@ h4{
     width: 100%;
 }
 
+.single-col{
+  margin:0;
+  @include mq(tablet){
+    margin:0 10px;
+  }
+}
 
 .gv-definition-text{
     color: #767676;
