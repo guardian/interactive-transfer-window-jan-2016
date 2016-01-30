@@ -7,7 +7,6 @@
 
     position: relative;
     width: 100%;
-    background: #fff;
     overflow: hidden;
     margin: 0 auto;
     box-sizing: border-box;
@@ -35,9 +34,7 @@
         text-decoration: underline;
     }
 }
-    @include mq(mobileLandscape) {
-        padding: 20px;
-    }
+   
 
     @each $bp in (tablet, desktop, leftCol, wide) {
         @include mq($bp) {

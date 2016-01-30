@@ -214,7 +214,11 @@
 
         }
         .cell-info {
-            margin: 6px 0 0 6px;
+            margin: 0 0 0 6px;
+
+            @include mq(leftCol){
+                margin: 6px 0 0 6px;
+            }
         }
 
         .cellLabel {

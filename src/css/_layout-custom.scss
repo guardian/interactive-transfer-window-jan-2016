@@ -5,27 +5,44 @@
     display: inline-block;
     margin: 36px 0 0;
     width: 100%;
-    max-width: 300px;
+    
     height: auto;
     -webkit-font-smoothing: antialiased;
 
 
     @include mq(tablet) {
-            margin: 0 10px;
+            margin: 0 20px 0 0;
+            max-width: 220px;
          }
+    @include mq(desktop) {
+            margin: 0 10px 0;
+            max-width: 280px;
+         }   
+     @include mq(leftCol) {
+            margin: 0 10px 0;
+            max-width: 300px;
+         }     
 
     p {
         font-family: "Guardian Egyptian Web",Georgia,serif;
         font-size: 18px;
         font-weight: 400;
-        color: #333;
+        color: #767676;
         margin:0;
 
    }
 }
-
-  
-
+.gv-custom-head2{
+    margin: 0;
+    font-size: 20px;
+    line-height: 24px;
+    font-family: 'Guardian Egyptian Web', Georgia, serif;
+    font-weight: 900;
+    -webkit-font-smoothing: antialiased;
+    @include mq(tablet){
+        margin: 0 0 12px 0;
+    }
+}
 .gv-halo-head {
     font-family: "Guardian Egyptian Web",Georgia,serif;
     font-size: 20px;
@@ -36,13 +53,15 @@
 }
 
 .gv-halo-cap-head {
+    position:relative;
+    margin:0;
+    padding:0;
+    display:block;
     font-family: "Guardian Text Sans Web",Georgia,serif;
     font-size: 14px;
     font-weight: 300;
-    color: #4cc5dc;
-    z-index: 1005;
+    color: #333;
     -webkit-font-smoothing: antialiased;
-    /* color: #002b58; */
 }
 
 .gv-halo-image-holder{
@@ -51,20 +70,31 @@
     background-repeat:no-repeat !important;
     // border-radius:999px;
     padding-bottom:100%;
+    margin-top:12px;
 }
 
 .gv-headline-text{
     position:relative;
-    width:100%;
-    margin:0;
+    margin:36px 0 0 0;
     padding:0;
     display:block;
-    font-family: "Guardian Egyptian Web",Georgia,serif;
-    font-size: 24px;
-    font-weight: 500;
+    font-family: "Guardian Text Sans Web",Georgia,serif;
+    font-size: 14px;
+    font-weight: 300;
     color: #767676;
-
     -webkit-font-smoothing: antialiased;
+
+    @include mq(tablet){
+        margin: 0;
+    }
+
+    @include mq(desktop){
+        font-family: "Guardian Egyptian Web",Georgia,serif;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    
 }
 
 .gv-headline-figure{
@@ -78,7 +108,13 @@
     color: #767676;
     -webkit-font-smoothing: antialiased;
 
-    @include mq(tablet){
+    @include mq(desktop){
+        margin-top:18px;
+        font-size: 48px;
+        font-weight: 200;
+    }
+
+    @include mq(leftCol){
         margin-top:18px;
         font-size: 60px;
         font-weight: 200;
@@ -95,6 +131,28 @@
     color: #767676;
     -webkit-font-smoothing: antialiased;
 
+}
+
+.gv-holder-div {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+}
+
+.single-col{
+    position: relative;
+      display:inline-block;
+      width:80px;
+      margin:0;
+    @include mq(desktop){
+      margin:0 20px 0 0;
+      width: 160px;
+    }
+
+     @include mq(leftCol){
+      margin:0 10px;
+      width: 220px;
+    }
 }
 
 }
