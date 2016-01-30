@@ -25,32 +25,6 @@ var mobileWin = 739;
 
 var cellPad = {t:12, b:0, r:0, l:6};
 
-var svgArrow = '<svg width="24px" height="22px" viewBox="0 0 24 22"><path fill="#FFFFFF" d="M0.62,10.49l1.44-1.44l9-8.989l0.97,0.969L4.521,10h19.12v2 l-19.12-0.001l7.51,8.971l-0.97,0.97l-9-9l-1.44-1.431V10.49"/></svg>'
-
-//var premClubs=['Arsenal','Aston Villa','Bournemouth','Chelsea','Crystal Palace','Everton','Leicester City','Liverpool','Manchester City','Manchester United','Newcastle United','Norwich City','Stoke City','Southampton','Sunderland','Swansea City','Tottenham Hotspur','West Bromwich Albion','Watford','West Ham United'];
-
-// var premClubs= [ {name:'Arsenal', hex:'#c40007'},
-// { name:'Aston Villa', hex:'#720e44'},
-// { name:'Bournemouth',hex:'#c80000'},
-// { name:'Chelsea',hex:'#005ca4'},
-// { name:'Crystal Palace',hex:'#af1f17'},
-// { name:'Everton',hex:'#00349a'},
-// { name:'Leicester City',hex:'#0b2f9d'},
-// { name:'Liverpool',hex:'#ce070c'},
-// { name:'Manchester City',hex:'#5cbfeb'},
-// { name:'Manchester United',hex:'#b00101'},
-// { name:'Newcastle United',hex:'#222222'},
-// { name:'Norwich City',hex:'#ffe400'},
-// { name:'Stoke City', hex:'#cc0617'},
-// { name:'Southampton',hex:'#d71921'},
-// { name:'Sunderland',hex:'#d51022'},
-// { name:'Swansea City',hex:'#efefef'},
-// { name:'Tottenham Hotspur',hex:'#eeeeee'},
-// { name:'West Bromwich Albion',hex:'#00246a'},
-// { name:'Watford', hex:'#fef502' },
-// { name:'West Ham United', hex:'#7c1e42' }
-// ];
-
 var premClubs= [ {name:'Arsenal', hex:'#000000'},
 { name:'Aston Villa', hex:'#00001D'},
 { name:'Bournemouth',hex:'#001E43'},
@@ -482,19 +456,22 @@ function setTreeMapDetails(d){
 }
 
 function setTreeMapDetailBuy(a,c){
+  var clubVar = a[0]["buyClub"];
+
+
+    var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players in</span><p style='margin:0; display:inline; width:100%; max-width:680px'>";
   
-  var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players in</span><p style='margin:0; display:inline; width:100%; max-width:680px'>";
-  var clubVar = "Arsenal";
         _.each(a, function(item,i){
           
           var spanClass = c;
+          if (item.buyClub != clubVar){  htmlStr+="<br/><br/> "; clubVar=item.buyClub } 
               htmlStr+="<span id='buyList_"+i+"' class='"+c+"' data-club='"+item.buyClub+"'><b>"+item.name+"</b> ";
               htmlStr+=setFeeForDetail(item.displayFee)+", ";
               htmlStr+=getPostionString(item.position);
               htmlStr+=", from "+item.sellClub;
               htmlStr+=" to "+item.buyClub;
               htmlStr+="; ";
-              if (item.buyClub != clubVar){ htmlStr+="<br/><br/> "; clubVar=item.buyClub} 
+              
               htmlStr+="</span>";  
           })
      
@@ -507,18 +484,17 @@ function setTreeMapDetailBuy(a,c){
 function setTreeMapDetailSell(a,c){
   var clubVar = a[0]["sellClub"];
 
-  
-
   var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players out</span><p style='margin:0; display:inline;'> ";
           _.each(a, function(item,i){
             var spanClass = "sell-list-item";
+            if (item.sellClub != clubVar){ htmlStr+="<br/><br/> "; clubVar=item.sellClub} 
               htmlStr+="<span  id='sellList_"+i+"' class='"+c+"' data-club='"+item.sellClub+"'><b>"+item.playername+"</b> ";
               htmlStr+=setFeeForDetail(item.displayFee)+", ";
               htmlStr+=getPostionString(item.position);
               htmlStr+=", from "+item.sellClub;
               htmlStr+=" to "+item.buyClub;
               htmlStr+="; ";
-              if (item.sellClub != clubVar){ htmlStr+="<br/><br/> "; clubVar=item.sellClub} 
+              
               htmlStr+="</span>";
 
 
@@ -559,7 +535,7 @@ function setDetailHeadFromMobile(d){
 
 
 function getBalanceStr(n){
-  var strOut = "£"+(n*-1)+"m";;
+  var strOut = "+£"+n+"m";;
 
     if (n < 0){
       strOut = "-£"+(n*-1)+"m";
@@ -887,9 +863,8 @@ function getStarMan(d){
 
 
 function getDetailArray (nameIn,valIn){
-  //buyArray, to, "Arsenal"
+  
       var tempArr = [];
-  //getClubArray(d.name, globalSortVar);
 
       if (valIn!="Total spending"){
           tempArr = _.filter(dataset, function(item){ return item[valIn] == nameIn; });
@@ -1015,7 +990,7 @@ function addD3Tree(dataJSON){
                           .attr("id","grandParentButton")
                           .style("display","none")
                           .attr("x", 0)
-                          .attr("y",-36) 
+                          .attr("y",-36)  
 
                        grandParentButtonGroup.append("rect")
                           .attr("x", 0)
@@ -1035,6 +1010,20 @@ function addD3Tree(dataJSON){
                           .attr("dy", ".75em");  
 
 
+
+                          // var g1 = svg.insert("g", ".grandparent")
+                          // <svg width="24px" height="22px" viewBox="0 0 24 22" id="svgArrow"><path fill="#CC0000" d="M0.62,10.49l1.44-1.44l9-8.989l0.97,0.969L4.521,10h19.12v2 l-19.12-0.001l7.51,8.971l-0.97,0.97l-9-9l-1.44-1.431V10.49"/></svg>    
+
+                      d3.xml("https://visuals.guim.co.uk/gdn-cdn/embed/2016/01/transfer-images/arrow-left.svg", "image/svg+xml", function(error, xml) {
+                              if (error) throw error;
+                              var importedNode = document.importNode(xml.documentElement, true);
+                              console.log(importedNode)
+                              document.getElementById("grandParentButton").appendChild(importedNode);
+                              
+                      });    
+
+                     
+                     
 
 
                       d3.json(dataJSON, function() {
