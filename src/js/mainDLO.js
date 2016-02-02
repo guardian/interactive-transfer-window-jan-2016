@@ -25,34 +25,6 @@ var mobileWin = 739;
 
 var cellPad = {t:12, b:0, r:0, l:6};
 
-var svgArrow = '<svg width="24px" height="22px" viewBox="0 0 24 22"><path fill="#FFFFFF" d="M0.62,10.49l1.44-1.44l9-8.989l0.97,0.969L4.521,10h19.12v2 l-19.12-0.001l7.51,8.971l-0.97,0.97l-9-9l-1.44-1.431V10.49"/></svg>'
-
-//var premClubs=['Arsenal','Aston Villa','Bournemouth','Chelsea','Crystal Palace','Everton','Leicester City','Liverpool','Manchester City','Manchester United','Newcastle United','Norwich City','Stoke City','Southampton','Sunderland','Swansea City','Tottenham Hotspur','West Bromwich Albion','Watford','West Ham United'];
-
-// var premClubs= [ {name:'Arsenal', hex:'#c40007'},
-// { name:'Aston Villa', hex:'#720e44'},
-// { name:'Bournemouth',hex:'#c80000'},
-// { name:'Chelsea',hex:'#005ca4'},
-// { name:'Crystal Palace',hex:'#af1f17'},
-// { name:'Everton',hex:'#00349a'},
-// { name:'Leicester City',hex:'#0b2f9d'},
-// { name:'Liverpool',hex:'#ce070c'},
-// { name:'Manchester City',hex:'#5cbfeb'},
-// { name:'Manchester United',hex:'#b00101'},
-// { name:'Newcastle United',hex:'#222222'},
-// { name:'Norwich City',hex:'#ffe400'},
-// { name:'Stoke City', hex:'#cc0617'},
-// { name:'Southampton',hex:'#d71921'},
-// { name:'Sunderland',hex:'#d51022'},
-// { name:'Swansea City',hex:'#efefef'},
-// { name:'Tottenham Hotspur',hex:'#eeeeee'},
-// { name:'West Bromwich Albion',hex:'#00246a'},
-// { name:'Watford', hex:'#fef502' },
-// { name:'West Ham United', hex:'#7c1e42' }
-// ];
-
-
-
 var premClubs= [ {name:'Arsenal', hex:'#000000'},
 { name:'Aston Villa', hex:'#00001D'},
 { name:'Bournemouth',hex:'#001E43'},
@@ -61,18 +33,18 @@ var premClubs= [ {name:'Arsenal', hex:'#000000'},
 { name:'Everton',hex:'#739ECE'},
 { name:'Leicester City',hex:'#A4CFFF'},
 { name:'Liverpool',hex:'#003C51'},
-{ name:'Manchester City',hex:'#00677E'},
+{ name:'Manchester City',hex:'#a4cfff'},
 { name:'Manchester United',hex:'#b00101'},
 { name:'Newcastle United',hex:'#4BC6DF'},
-{ name:'Norwich City',hex:'#85F9FF'},
+{ name:'Norwich City',hex:'#00677E'},
 { name:'Stoke City', hex:'#BCFFFF'},
-{ name:'Southampton',hex:'#F3FFFF'},
+{ name:'Southampton',hex:'#658299'},
 { name:'Sunderland',hex:'#002519'},
 { name:'Swansea City',hex:'#004D3F'},
 { name:'Tottenham Hotspur',hex:'#377A6A'},
 { name:'West Bromwich Albion',hex:'#66A998'},
 { name:'Watford', hex:'#96DBC9' },
-{ name:'West Ham United', hex:'#C9FFFC' }
+{ name:'West Ham United', hex:'#41709D' }
 ];
 
 
@@ -139,15 +111,17 @@ function modelData(r){
 
         })
     allTransfersArr = dataset;
+
         sellArr = filterArray(dataset,"previousleague","Premier League (England)");
 
          _.each(premClubs, function(one){
               _.each(dataset, function(two){
-                  if(one.name === two.to){
+                  if(one.name === two.to || one.name === two.from){
                       //one = two.to;  
                       two.hex = one.hex;
                       tempArr.push (two);           
-                  }           
+                  }  
+
               });
           });
 
@@ -258,40 +232,94 @@ function filterTreeMap(varIn){
   document.getElementById("detailView").style.display="none";
 
       var playerCount = getCountByProperty(dataset, varIn);
-        
-           playerCountArray = _.map(playerCount, function(val, key, list) {
 
+          playerCountArray = _.map(playerCount, function(val, key, list) {
+                    var num = _.reduce(val, function(memo, player) {
+                    var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);return memo + cost;}, 0);
+                              if (varIn=="Total spending"){
+                                      return {
+                                                name: "Total spending",
+                                                totalCost: num,
+                                                size: num +1000000
+                                              };
+                                }else{
+                                      return {
+                                                name: key,
+                                                totalCost: num,
+                                                size: num +1000000
+                                              };
+                                }
+                        
 
-                  var num = _.reduce(val, function(memo, player) {
-                  var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);
-                  return memo + cost;
-                }, 0);
+                    });
 
+        var playerCountSell = getCountByProperty(dataset, "from");
 
-                if (varIn=="Total spending"){
-                      return {
-                                name: "Total spending",
-                                totalCost: num,
-                                children: playerCount,
-                                size: num +1000000
-                              };
-                }else{
-                      return {
-                                name: key,
-                                totalCost: num,
-                                children: playerCount,
-                                size: num +1000000
-                              };
-                }
-                
+            var playerCountArraySell = _.map(playerCountSell, function(val, key, list) {
+                    var num = _.reduce(val, function(memo, player) {
+                    var cost = (isNaN(parseInt(player.price))) ? 0 : parseInt(player.price);return memo + cost;}, 0);
+                              if (varIn=="Total spending"){
+                                      return {
+                                                name: "Total spending",
+                                                totalProfit: num,
+                                                size: num +1000000
+                                              };
+                                }else{
+                                      return {
+                                                name: key,
+                                                totalProfit: num,
+                                                size: num +1000000
+                                              };
+                                }
+                        
 
-            });
-
+                    });
       
-           
-        rootJSON = buildTreeJson(playerCountArray);
-      
-        buildTreeMap(rootJSON);
+      playerCountArray = filterArrayPrem (playerCountArray, "name");
+      playerCountArraySell =  filterArrayPrem (playerCountArraySell, "name");
+
+      var tempArr=[];
+
+      _.each(playerCountArray, function(buyItem){
+            var tempObj = {};
+                  _.each(playerCountArraySell, function(sellItem){
+                    
+                            if (buyItem.name == sellItem.name){
+                                  tempObj.name = buyItem.name;
+                                  tempObj.totalProfit = sellItem.totalProfit;
+                                  tempObj.totalCost = buyItem.totalCost;
+                                  tempObj.size = buyItem.size + sellItem.size;
+                            }
+                      
+                  })
+              tempArr.push(tempObj);
+      })
+
+
+      _.each(premClubs, function(item){
+                 _.each(playerCountArraySell, function(sellItem){                    
+                            if (item.name == sellItem.name){
+                                  item.totalProfit = sellItem.totalProfit;
+                            }
+                  })
+
+                 _.each(playerCountArray, function(buyItem){                    
+                            if (item.name == buyItem.name){
+                                  item.totalCost = buyItem.totalCost;
+                            }
+                  })
+
+      })
+
+      _.each(premClubs, function(item){
+            if(!item.totalProfit){item.totalProfit=0};
+            if(!item.totalCost){item.totalCost=0};
+      });
+
+      console.log(playerCountArray)
+
+      playerCountArray = premClubs;
+      checkTreemapSize()
 }
 
 function buildTreeMap(dataJSON){
@@ -308,6 +336,7 @@ function setCellLabels(d,dir){
 
 
 function buildTreeJson(data) {
+
     var r = {}, i, obj;
     r.name = "All premier league clubs";
     r.children = [];
@@ -319,13 +348,13 @@ function buildTreeJson(data) {
     var allBuysCost = 0;
     
     for ( i = 0; i < data.length; i++) {
-          var buyGrandChildren = [];
 
+          var buyGrandChildren = [];
 
           _.each(dataset, function(item,k){
                 if (item.to == data[i]["name"]){
                   var grandChild = {};
-                  grandChild.tintColor = item.hex;
+                  grandChild.tintColor = data[i].hex;
                   grandChild.name = item.playername;
                   grandChild.price = checkForNumber(item.price)
                   grandChild.size = checkForNumber(item.price) + 1000000
@@ -345,7 +374,7 @@ function buildTreeJson(data) {
             _.each(dataset, function(item,k){
                 if (item.from == data[i]["name"]){
                   var grandChild = {};
-                  grandChild.tintColor = item.hex;
+                  grandChild.tintColor = data[i].hex;
                   grandChild.name = item.playername;
                   grandChild.price = checkForNumber(item.price)
                   grandChild.size = checkForNumber(item.price) + 1000000
@@ -358,34 +387,13 @@ function buildTreeJson(data) {
                   sellGrandChildren.push(grandChild)
                   hex = item.hex;
                 }
+                
+
             })     
 
-           
-
-            var buyFigure = 0;
-            _.each(buyGrandChildren, function(item){
-                  if(item.buySell == "buy"){ 
-                    buyFigure += checkForNumber(item.price)
-                    allBuysCost += checkForNumber(item.price) 
-                  }
-            })
-
-            data[i].buyCost = buyFigure;
-
-
-            var sellFigure = 0;
-            _.each(sellGrandChildren, function(item){
-                  if(item.buySell == "sell"){ 
-                      sellFigure += checkForNumber(item.price); 
-                      allSalesCost+= checkForNumber(item.price);
-                  }
-            })
-
-            data[i].sellCost = sellFigure;
 
                   obj = {};
                   obj.name = data[i]["name"];
-                  obj.size = data[i]["size"] + data[i].salesCost;
                   obj.value = data[i]["size"]  + data[i].salesCost
                   obj.totalCost = data[i]["totalCost"]
                   obj.buyCost = data[i].buyCost;
@@ -395,14 +403,41 @@ function buildTreeJson(data) {
                   obj.balanceCost = obj.buyFigure - obj.totalCost;
                   obj.grossCost = obj.buyFigure + obj.totalCost;
 
-                  obj.tintColor = hex
-                  obj.children = buyGrandChildren;
+                  obj.tintColor =  data[i].hex;
+                  //obj.children = buyGrandChildren;
                   obj.sellChildren = sellGrandChildren;
+                  obj.children = buyGrandChildren.concat(sellGrandChildren);
+
+                  
+                  var uniqueList = _.uniq(obj.children, function(item, key, name) { return item.name; });
+
+                  obj.children = uniqueList;
+
+                  var sellFigure = 0;
+                  var buyFigure = 0;
+                  _.each(obj.children, function(item){
+                        if(item.buySell == "buy"){ 
+                          buyFigure += checkForNumber(item.price)
+                          allBuysCost += checkForNumber(item.price) 
+                        }
+                        if(item.buySell == "sell"){ 
+                            sellFigure += checkForNumber(item.price); 
+                            allSalesCost+= checkForNumber(item.price);
+                        }
+                  })
+
+            data[i].buyCost = buyFigure;
+            data[i].sellCost = sellFigure;
+            data[i].tintColor = data[i].hex;
+
+            obj.buyCost = data[i].buyCost;
+            obj.sellCost = data[i].sellCost;
+
 
             r.children.push(obj);
             r.sellCost = allSalesCost;
             r.buyCost = allBuysCost;
-       
+            r.size = allBuysCost+allSalesCost;
         }
 
 
@@ -460,7 +495,7 @@ function setFeeForDetail(v){
 
 
 function setTreeMapDetails(d){
-  var a = allTransfersArr; 
+  var a = filterArrayPrem (allTransfersArr, "to"); 
   var a2 = filterArrayPrem (allTransfersArr, "from");
   var c = "buy-list-item";  
   var c2 = "sell-list-item"; 
@@ -474,72 +509,102 @@ function setTreeMapDetails(d){
     c2+=" highlight-cell" 
 }
   setDetailHead(d); 
-  setTreeMapDetailBuy(a,c)
   setTreeMapDetailSell(a2, c2)
+  setTreeMapDetailBuy(a,c)
+  
 
   
 }
 
 function setTreeMapDetailBuy(a,c){
-   
-  var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players in</span><p style='margin:0; display:inline; width:100%; max-width:680px'>";
 
-        _.each(a, function(item,i){
-          var spanClass = c;
-              htmlStr+="<span id='buyList_"+i+"' class='"+c+"' data-club='"+item.buyClub+"'><b>"+item.name+"</b> ";
-              htmlStr+=setFeeForDetail(item.displayFee)+", ";
-              htmlStr+=getPostionString(item.position);
-              htmlStr+=", from "+item.sellClub;
-              htmlStr+=" to "+item.buyClub;
-              htmlStr+="; ";
-              htmlStr+="</span>";  
-          })
+  var clubVar = "null";
 
-     
-     htmlStr += "</p>";
-  if (a.length == 0){ htmlStr = "No players in"};
-
-  document.getElementById("treeMapDetailBuy").innerHTML = htmlStr;
-}
-
-function setTreeMapDetailSell(a,c){
-
-  var htmlStr = "<span class='gv-headline-cap' style='width:100%'>Players out</span><p style='margin:0; display:inline;'> ";
+  var htmlStr = "  ";
           _.each(a, function(item,i){
 
+            var spanClass = "buy-list-item";
 
-            var spanClass = "sell-list-item";
-              htmlStr+="<span  id='sellList_"+i+"' class='"+c+"' data-club='"+item.sellClub+"'><b>"+item.playername+"</b> ";
+            if (item.buyClub != clubVar && i != 0){ htmlStr+="<br/>" };
+            if (item.buyClub != clubVar ){ htmlStr+="<span class='"+c+"'><b>"+item.buyClub+"</b></span><br/> "; clubVar=item.buyClub; } 
+
+              htmlStr+="<span  id='sellList_"+i+"' class='gv-headline-cap' data-club='"+item.buyClub+"'><b>"+item.playername+"</b> ";
               htmlStr+=setFeeForDetail(item.displayFee)+", ";
-              htmlStr+=getPostionString(item.position);
-              htmlStr+=", from "+item.sellClub;
-              htmlStr+=" to "+item.buyClub;
-              htmlStr+="; "; 
+              // htmlStr+=getPostionString(item.position);
+              htmlStr+=" from "+item.sellClub;
+              // htmlStr+="; ";
+              
               htmlStr+="</span>";
+
           })
     htmlStr += "</p>";
 
-    if (a.length == 0){ htmlStr = "No players out"};
+    if (a.length == 0){ htmlStr = " "};
+    document.getElementById("treeMapDetailBuy").innerHTML = htmlStr;
+}
+
+function setTreeMapDetailSell(a,c){
+  var clubVar = "null";
+
+  var htmlStr = "  ";
+          _.each(a, function(item,i){
+
+            var spanClass = "sell-list-item";
+
+            if (item.sellClub != clubVar && i != 0){ htmlStr+="<br/>" };
+            if (item.sellClub != clubVar ){ htmlStr+="<span class='"+c+"'><b>"+item.sellClub+"</b></span><br/> "; clubVar=item.sellClub; } 
+
+              htmlStr+="<span  id='sellList_"+i+"' class='gv-headline-cap' data-club='"+item.sellClub+"'><b>"+item.playername+"</b> ";
+              htmlStr+=setFeeForDetail(item.displayFee)+", ";
+              // htmlStr+=getPostionString(item.position);
+              htmlStr+=" to "+item.buyClub;
+              // htmlStr+="; ";
+              
+              htmlStr+="</span>";
+
+          })
+    htmlStr += "</p>";
+    document.getElementById("playersOutHead").style.display = "block";
+    if (a.length == 0){ htmlStr = " "; document.getElementById("playersOutHead").style.display = "none";}
     document.getElementById("treeMapDetailSell").innerHTML = htmlStr;
 }
 
 
 function setDetailHead(d){
-      
-      document.getElementById("grandParentButton").style.display = "none";
 
+console.log(d)
       if(document.getElementById("grandParentButton")){
+        document.getElementById("grandParentButton").style.display = "none";
           if (d.name!="All premier league clubs"){ 
               document.getElementById("grandParentButton").style.display = "inline-block"; 
           }
 
             var  n = checkForNumber(d.sellCost-d.buyCost)
-
                 document.getElementById("detailClubname").innerHTML = d.name;
-                document.getElementById("detailBalance").innerHTML = "£"+myRound(n)+"m";
+                document.getElementById("detailBalance").innerHTML = getBalanceStr(myRound(n));
                 document.getElementById("detailSpending").innerHTML = "£"+myRound(d.buyCost)+"m";
                 document.getElementById("detailSales").innerHTML = "£"+myRound(d.sellCost)+"m"; 
       }
+}
+
+function setDetailHeadFromMobile(d){
+    var  n = checkForNumber(d.sellCost-d.buyCost)
+                document.getElementById("detailClubname").innerHTML = d.name;
+                document.getElementById("detailBalance").innerHTML = getBalanceStr(myRound(n));
+                document.getElementById("detailSpending").innerHTML = "£"+myRound(d.buyCost)+"m";
+                document.getElementById("detailSales").innerHTML = "£"+myRound(d.sellCost)+"m"; 
+}
+
+
+function getBalanceStr(n){
+  var strOut = "+£"+n+"m";;
+
+    if (n < 0){
+      strOut = "-£"+(n*-1)+"m";
+    }
+
+    return strOut;
+
 }
 
 function setStarManDetail(d){
@@ -726,7 +791,7 @@ function addListeners(){
 
   var interactiveContainer = document.getElementById("interactiveContainer");
        
- window.addEventListener('resize', function() {setTimeout(checkWinSize, 2000); }, true);
+ window.addEventListener("resize", checkWin);
         
 
   document.getElementById("filterDropdown").addEventListener('change', filterChanged);
@@ -786,11 +851,11 @@ function buildTopBuyView(a){
   var htmlStr = "";
 
   _.each(a, function (item,i){
-    htmlStr+= '<div class="gv-halo-column">'
-    htmlStr+= '<p><strong>'+item.nameofplayer+'</strong></>'
+    htmlStr+= '<div class="gv-halo-column" style="vertical-align: text-top;">'
+    htmlStr+= '<p style="margin-top:0px;"><strong>'+item.nameofplayer+', '+setFeeForDetail(item.dataObj.displayFee)+'</strong></p>'
+     htmlStr+= '<p>To '+item.dataObj.buyClub+'<br/>from '+item.dataObj.sellClub+'</p>'
     htmlStr+= '<div class="gv-halo-image-holder" style="background: url('+item.imageurl+'/500.jpg)">'
     htmlStr+= '</div>'  
-    htmlStr+= '<p><strong>'+setFeeForDetail(item.dataObj.displayFee)+'</strong>, to '+item.dataObj.buyClub+' from '+item.dataObj.sellClub+'</p>'
     htmlStr+= '</div>'
   })
 
@@ -860,9 +925,8 @@ function getStarMan(d){
 
 
 function getDetailArray (nameIn,valIn){
-  //buyArray, to, "Arsenal"
+  
       var tempArr = [];
-  //getClubArray(d.name, globalSortVar);
 
       if (valIn!="Total spending"){
           tempArr = _.filter(dataset, function(item){ return item[valIn] == nameIn; });
@@ -967,15 +1031,13 @@ function addD3Tree(dataJSON){
                           .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                           .style("shape-rendering", "crispEdges");
 
-                      treemap = d3.layout.treemap()
-                          //.size([width,height])
-                          .ratio(3)
+                      treemap = d3.layout.treemap() 
+                          .ratio(1)
                           .sticky(false)
                           .mode("squarify")
                           .round(false)
                           .sort(function(a, b) { return a.value - b.value; })
                           .children(function(d, depth) { return depth ? null : d._children; })
-
 
                       var grandparent = svg.append("g")
                           .attr("class", "grandparent");
@@ -983,13 +1045,13 @@ function addD3Tree(dataJSON){
                       grandparent.append("rect")
                           .attr("y", 0-margin.top)
                           .attr("width", width)
-                          .attr("height", margin.top);
+                          .attr("height", margin.top)
 
                     var grandParentButtonGroup = grandparent.append("g")    
                           .attr("id","grandParentButton")
                           .style("display","none")
                           .attr("x", 0)
-                          .attr("y",-36) 
+                          .attr("y",-36)  
 
                        grandParentButtonGroup.append("rect")
                           .attr("x", 0)
@@ -1009,6 +1071,20 @@ function addD3Tree(dataJSON){
                           .attr("dy", ".75em");  
 
 
+
+                          // var g1 = svg.insert("g", ".grandparent")
+                          // <svg width="24px" height="22px" viewBox="0 0 24 22" id="svgArrow"><path fill="#CC0000" d="M0.62,10.49l1.44-1.44l9-8.989l0.97,0.969L4.521,10h19.12v2 l-19.12-0.001l7.51,8.971l-0.97,0.97l-9-9l-1.44-1.431V10.49"/></svg>    
+
+                      d3.xml("https://visuals.guim.co.uk/gdn-cdn/embed/2016/01/transfer-images/arrow-left.svg", "image/svg+xml", function(error, xml) {
+                              if (error) throw error;
+                              var importedNode = document.importNode(xml.documentElement, true);
+                              console.log(importedNode)
+                              document.getElementById("grandParentButton").appendChild(importedNode);
+                              
+                      });    
+
+                     
+                     
 
 
                       d3.json(dataJSON, function() {
@@ -1045,6 +1121,7 @@ function addD3Tree(dataJSON){
                         // coordinates. This lets us use a viewport to zoom.
                         function layout(d) {
                           if (d._children) {
+
                             treemap.nodes({_children: d._children});
                             d._children.forEach(function(c) {
                               c.x = d.x + c.x * d.dx;
@@ -1052,7 +1129,6 @@ function addD3Tree(dataJSON){
                               c.dx *= d.dx;
                               c.dy *= d.dy;
                               c.parent = d;
-                              console.log(c)
                               layout(c);
                             });
                           }
@@ -1081,12 +1157,12 @@ function addD3Tree(dataJSON){
                             .enter().append("rect")
                               .attr("class", "child ")
                               .attr("class", function(d) { return "child "+(d.buySell); })
-
+                              .style("fill", function(d){return d.tintColor})
                               .call(rect);
 
                           g.append("rect")
                               .style("fill", function(d){return d.tintColor})
-                              .attr("class", "parent")
+                              .attr("class", function(d) { return "parent "+(d.buySell); })
                               .call(rect)
                             // .append("title")
                         //   .text(function(d) { return formatNumber(d.name); });
@@ -1099,10 +1175,16 @@ function addD3Tree(dataJSON){
 
                            g.append("text")
                               .attr("dy", "1.3em")
-                              .text(function(d) { return d.displayFee; })
+                              .text(function(d) { return displayFeeCheck(d.displayFee) })
                               .attr("class", "cellLabelFee")
                               .call(text);
 
+
+                          function displayFeeCheck(n){
+                            var t = n;
+                                if(t<0.5){ t = " "}
+                            return t;
+                          }
 
                           function transition(d) {
                             //updateBarChart(d)
@@ -1166,6 +1248,101 @@ function addD3Tree(dataJSON){
   
 
 }
+
+
+
+// function addD3Tree(dataIn){
+
+
+//     var htmlStr = "";
+//     var div,root,node,nodes;
+
+//     var w = d3.select("#treemapFlex").node().getBoundingClientRect().width;
+//     var h = getTreeMapH(w);
+
+//     console.log(dataIn)
+
+//     _.each(dataIn.children, function(obj){
+//             obj.treeMapArea < 2800000 ? obj.treeMapArea = 3000000 : obj.treeMapArea = (obj.treeMapArea+2800000);
+
+//             //obj.treeMapArea += 60000000;
+//         });
+
+
+//      _.sortBy(dataIn.children, function(num){ return dataIn.children.value; });      
+//         //positionDetailView();
+//               treemap = d3.layout.treemap()
+//                 .size([w, h])
+//                 .sticky(false)
+//                 .ratio('3')
+//                 .mode("dice")
+
+//                 .sort(function comparator(a, b) {
+//                     if(a.name == "Other leagues"){
+//                       a.totalCost = 0
+//                     }
+
+//                     if(a.name == "Other countries"){
+//                       a.totalCost = 0
+//                     }
+
+//                   return a.totalCost - b.totalCost;
+//                 })
+
+//                 .round(true)
+//                 .value(function(d) { return d.size });
+
+
+//               div = d3.select("#treemap-view").append("div")
+
+//                 .style("position", "relative")
+//                 .style("width", w + "px")
+//                 .style("height", h+"px")
+//                 .style("opacity",1);
+
+//                 //div.transition().style("height", h+"px").duration(500);
+          
+//                 root = dataIn;
+//                 node = root = dataIn;
+//                 nodes = treemap.nodes(root)
+                
+//             .filter(function(d) { return !d.children; });
+
+//                   div.data([root]).selectAll("div").data(treemap.nodes).enter().append("div").attr("class", function(d) {
+
+//                             if(d.depth > 1 || d.depth == 0) {
+//                                 return "cell hide";
+                                
+//                             } else {
+//                                 return "cell show";
+//                             }
+//                   })
+
+//               .attr("id", function(d) { return "cell_" + d.index; })
+//               .style("background", function(d) { return d.tintColor; })
+
+//               .html(function(d) {
+//                 if(d.name=="Other leagues" || d.name=="Other countries"){
+//                   var cellStr = getPostionStringTreemap(d.name);
+
+//                 }else{
+//                   var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
+//                 }
+//                 return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
+//                 })//return d.children ? color(d.name) : null;
+              
+
+//               .call(cell).on("click", function(d) {  
+//                 zoomToDetailView(d, this); 
+//                 gotoPosition = $(this).offset().top;
+//                 iframeMessenger.getPositionInformation(scrollPage);
+//               });
+              
+//               div.selectAll(".cell").data(treemap.value(function(d) {  return d.treeMapArea; })).call(cell);
+                
+//           //$(".cellCutBlock").hide();
+
+// }
 
 function updateTreeLayout(w,h) 
 { 
@@ -1258,11 +1435,246 @@ function updateBarChart(d){
       document.getElementById('tableClub').innerHTML = d.name +'<br><span class="gv-definition-text" id="tableBalance">Balance:'+n+'</span>';
       
   }
+}
 
 
- 
+
+///////////////////////////////////////////////////////START MOBILE TREEMAP ///////////////////////////////////////////////
+
+function checkWin(){
+    setTimeout(checkTreemapSize, 1000);
+}
+
+
+
+function checkTreemapSize(){
+
+    var el = document.getElementById("treemapFlex");
+    var windowW = el.offsetWidth;
+    
+    if(windowW <= 899){
+      rootJSON = buildTreeJsonMobile(playerCountArray);
+      document.getElementById("treemapFlex").innerHTML = " ";
+      buildTreeMapMobile(rootJSON);
+    }
+    if(windowW > 899)
+    {
+      rootJSON = buildTreeJson(playerCountArray);
+      document.getElementById("treemapFlex").innerHTML = " ";  
+      buildTreeMap(rootJSON);
+      
+    }
+}
+
+function buildTreeJsonMobile(data) {
+
+    var root = {}, i, val, obj, othersObj;
+
+    root.name = "All premier league clubs";
+
+    root.children = [];
+
+    var rootBuyCost = 0;
+
+    var rootSellCost = 0;
+
+        for ( i = 0; i < data.length; i++) {
+          var tempArr = [];
+
+                  obj = {};
+                  obj.index = i;
+                  obj.name = data[i]["name"];
+                  obj.size = data[i]["totalCost"] + 100000;
+                  obj.value = data[i]["totalCost"];
+
+                  
+                  obj.totalCost = (data[i]["totalCost"]);
+                  obj.treeMapArea = (data[i]["totalCost"]);
+                  obj.name = data[i]["name"];
+                  
+                  var tempBuy = 0
+                  _.each(dataset, function(item){
+
+                        var tempObj = {}
+                        if (data[i].name == item.to){
+                            obj.tintColor = item.hex;
+                            tempObj.size = checkForNumber(item.price) +1000000;
+                            tempObj.dataObj = item;
+                            tempArr.push(tempObj);
+                            tempBuy+=checkForNumber(item.price)
+                            rootBuyCost+=checkForNumber(item.price);
+                        }
+                        obj.buyCost = tempBuy; 
+                  })
+
+                   
+                  var tempSell = 0
+                   _.each(dataset, function(item){
+
+                        
+                        if (data[i].name == item.from){
+
+                            tempSell+=checkForNumber(item.price)
+                            rootSellCost+=checkForNumber(item.price);
+                        }
+                      obj.sellCost = tempSell;  
+                      
+                  })
+
+                  //d.sellCost-d.buyCost
+                  
+                  obj._children = tempArr;
+            root.buyCost = rootBuyCost;
+            root.sellCost = rootSellCost;
+            
+            root.children.push(obj);          
+
+        }
+
+
+return root;
+}
+  
+
+var borderWidth = 0.5;
+
+function buildTreeMapMobile(dataIn){
+    
+    _.each(dataIn.children, function(obj){
+            obj.treeMapArea < 12000000 ? obj.treeMapArea = 12000000 : obj.treeMapArea = (obj.treeMapArea+12000000);
+        });
+     var el = document.getElementById("treemapFlex");  
+     var wid = el.offsetWidth;   
+     var hei = 420;
+     var div;
+
+
+     setDetailHeadFromMobile(dataIn);
+
+     console.log(dataIn)
+
+     _.sortBy(dataIn.children, function(num){ return dataIn.children.value; });      
+        //positionDetailView();
+              treemap = d3.layout.treemap()
+                .size([wid, hei])
+                .sticky(false)
+                .ratio('3')
+                .mode("dice")
+
+                .sort(function comparator(a, b) {
+                    if(a.name == "Other leagues"){
+                      a.totalCost = 0
+                    }
+
+                    if(a.name == "Other countries"){
+                      a.totalCost = 0
+                    }
+
+                  return a.totalCost - b.totalCost;
+                })
+
+                .round(true)
+                .value(function(d) { return d.size });
+
+
+              div = d3.select("#treemapFlex").append("div")
+
+                .style("position", "relative")
+                .style("width", wid + "px")
+                .style("height", hei+"px")
+                .style("opacity",1);
+          
+               var root = dataIn;
+               var node = root = dataIn;
+               var nodes = treemap.nodes(root)
+                
+            .filter(function(d) { return !d.children; });
+
+                  div.data([root]).selectAll("div").data(treemap.nodes).enter().append("div").attr("class", function(d) {
+                            if(d.depth > 1 || d.depth == 0) {
+                                return "cell hide";
+                                
+                            } else {
+                                return "cell show";
+                            }
+                  })
+
+              .attr("id", function(d) { return "cell_" + d.index; })
+              .style("background", function(d) { return d.tintColor; })
+
+
+
+              .html(function(d) {
+                if(d.name=="Other leagues" || d.name=="Other countries"){
+                  var cellStr = getPostionStringTreemap(d.name);
+
+                }else{
+                  var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
+                }
+                return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
+                })//return d.children ? color(d.name) : null;
+              
+
+              .call(cell).on("click", function(d) {  
+                zoomToDetailView(d, this); 
+                //iframeMessenger.getPositionInformation(scrollPage);
+              });
+              
+              div.selectAll(".cell").data(treemap.value(function(d) {  return d.treeMapArea; })).call(cell);
+
+              function cell() {
+                        this
+                        .style("left", function(d) {
+                          return d.x + "px";
+                          
+                        })
+
+                        .style("top", function(d) {
+                          return d.y + "px";
+                        })
+
+                        .style("width", function(d) {
+                            return Math.max(0, d.dx - borderWidth) + "px";
+                        })
+
+
+                        .style("height", function(d) {
+
+                            return Math.max(0, (d.dy) - borderWidth) + "px";
+                        })
+
+                        //.style("opacity", "0")
+
+                        
+
+                        .style("display", function(d) {
+                          if(d.depth <= 1 && d.depth != 0) {
+                            return "block";
+                          } else {
+                            return "none";
+                          }
+                                  })
+              }
+
+    //this.transition().style("height", h+"px").duration(500);
 
 }
+
+
+     
+function zoomToDetailView(d, currClip) { 
+      _.each((document.getElementsByClassName("cell show")), function(item){ 
+              item.id == currClip.id ? item.style.opacity = 1 : item.style.opacity = 0.4;
+              
+
+      })
+      setDetailHeadFromMobile(d);
+      setTreeMapDetails(d);
+      
+}
+
+
+/////////////////////////////////////////END MOBILE TREEMAP////////////////////////////////////////
 
 
 

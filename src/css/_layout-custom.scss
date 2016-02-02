@@ -78,9 +78,9 @@
     margin:36px 0 0 0;
     padding:0;
     display:block;
-    font-family: "Guardian Text Sans Web",Georgia,serif;
-    font-size: 14px;
-    font-weight: 300;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-size: 18px;
+    font-weight: bold;
     color: #767676;
     -webkit-font-smoothing: antialiased;
 
@@ -89,24 +89,26 @@
     }
 
     @include mq(desktop){
-        font-family: "Guardian Egyptian Web",Georgia,serif;
-        font-size: 18px;
-        font-weight: bold;
+        
     }
 
     
 }
 
 .gv-headline-figure{
-    position:relative;
-    width:100%;
-    margin:0 0 6px 0;
-    display:block;
+    position: relative;
+    width: 100%;
+    margin: 0 0 6px 0;
+    display: block;
     font-family: "Guardian Egyptian Web",Georgia,serif;
-    font-size: 24px;
-    font-weight: 400;
+    font-size: 18px;
+    font-weight: 600;
     color: #767676;
     -webkit-font-smoothing: antialiased;
+
+    @include mq(tablet){
+        font-size: 22px;
+    }
 
     @include mq(desktop){
         margin-top:18px;
@@ -130,7 +132,6 @@
     font-weight: 400;
     color: #767676;
     -webkit-font-smoothing: antialiased;
-
 }
 
 .gv-holder-div {
@@ -144,15 +145,38 @@
       display:inline-block;
       width:80px;
       margin:0;
-    @include mq(desktop){
+
+
+    @include mq(tablet){
       margin:0 20px 0 0;
-      width: 160px;
+      width: 180px;
     }
 
      @include mq(leftCol){
       margin:0 10px;
-      width: 220px;
+      width: 230px;
     }
+}
+
+.treemap-mobile-div{
+    position:relative;
+    margin: 0 0 1px 0;
+    padding: 0; 
+    width:100%;
+    cursor:pointer;
+
+
+    .cell-mobile-label{
+        width:100%;
+        padding: 3px 0 0 3px;
+        font-family: "Guardian Text Sans Web",Georgia,serif;
+        font-size: 14px;
+        font-weight: 400;
+        color: #FFF;
+        -webkit-font-smoothing: antialiased;
+    }
+
+
 }
 
 }

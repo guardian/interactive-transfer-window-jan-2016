@@ -108,7 +108,15 @@ tr.spaceBelow > td
  }
 
 .buy-list-item, .sell-list-item{
+    font-family: "Guardian Text Sans Web",Georgia,serif;
+    font-size:14px;
     color:#767676 !important;
+
+    @include mq(tablet){
+        font-family: "Guardian Egyptian Web",Georgia,serif;
+        font-size: 18px;
+        line-height: 27px;
+    }
 }
 
 .highlight-cell{

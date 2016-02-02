@@ -19,13 +19,16 @@
     }
 
     rect {
-      fill: #005689;
       stroke: #fff;
+    stroke-width:0;
+      //stroke-opacity:0.25;
+     
     }
 
     rect.parent,
     .grandparent rect {
-      stroke-width: 2px;
+      stroke-width: 1px;
+
     }
 
     .grandparent rect {
@@ -42,15 +45,20 @@
       cursor: pointer;
     }
 
-    .children rect.parent {
-      fill: #194377;
-      fill-opacity: .5;
-    }
+    
 
     .children:hover rect.child {
       fill: #bbb;
     }
 
+
+    .treemapText {
+            font: 13px "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
+            line-height: 14px;
+            fill:#767676;
+            color:#767676;
+            stroke:none;  
+    }
     .cellLabel {
             font: 13px "Guardian Text Sans Web", Arial, Helvetica, sans-serif;
             line-height: 14px;
@@ -64,6 +72,15 @@
     .grey{
         fill:#CCC;
     }
+
+    .buy{
+        fill-opacity:1;
+    }
+
+    .sell{
+        fill-opacity:0.7;
+    }   
+
     .cellLabelFee{
         font: 28px "Guardian Egyptian Web";
         line-height: 14px;
@@ -73,6 +90,13 @@
     }
 
 
+    .children rect.parent {
+      fill-opacity: 0;
+    }
+
+    .children rect.sell {
+    
+    }
 
 }
 
@@ -199,7 +223,7 @@
             cursor: pointer;
             stroke:#FFF;
             stroke-width:1;
-            stroke-opacity:0.9
+            stroke-opacity:0.1;
         }
 
         .cell:hover {
@@ -246,17 +270,6 @@
 text {
   font-size: 11px;
 }
-
-rect {
-  fill: none;
-}
     
-.buy{
-
-    }
-
-    .sell{
-        fill-opacity:0.25;
-    }   
 
 }         
