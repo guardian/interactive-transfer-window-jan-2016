@@ -18,6 +18,7 @@ var colorsArr = [];
 var allTransfersArr, treeJson, playerCountArray, rootJSON, parseData, dataset, starData, leaguesArray, nationalitiesArray, sellArr, gotoPosition, dataJSON;
 var treemap;
 var myView = false;
+var rootTitle = "All clubs";
 
 
 var globalSortVar = "to";
@@ -31,13 +32,13 @@ var premClubs= [ {name:'Arsenal', hex:'#000000'},
 { name:'Chelsea',hex:'#00456E'},
 { name:'Crystal Palace',hex:'#41709D'},
 { name:'Everton',hex:'#739ECE'},
-{ name:'Leicester City',hex:'#A4CFFF'},
+{ name:'Leicester City',hex:'#000232'},
 { name:'Liverpool',hex:'#003C51'},
 { name:'Manchester City',hex:'#a4cfff'},
-{ name:'Manchester United',hex:'#b00101'},
+{ name:'Manchester United',hex:'#1c4c00'},
 { name:'Newcastle United',hex:'#4BC6DF'},
 { name:'Norwich City',hex:'#00677E'},
-{ name:'Stoke City', hex:'#BCFFFF'},
+{ name:'Stoke City', hex:'#062300'},
 { name:'Southampton',hex:'#658299'},
 { name:'Sunderland',hex:'#002519'},
 { name:'Swansea City',hex:'#004D3F'},
@@ -103,10 +104,11 @@ function modelData(r){
             totalSpend+=tempFee;
                var displayFee = tempFee;
                 displayFee == 0 ? displayFee = item.price : displayFee = myRound(tempFee, 2 );
+                displayFee == 0 ? item.itemNumericFee = 0 : item.itemNumericFee = displayFee;
                 item.displayFee = displayFee;
                 item.name = item.playername.trim();
                 item.buyClub = item.to;
-                item.sellClub = item.from;
+                item.sellClub = item.from; 
 
 
         })
@@ -316,8 +318,6 @@ function filterTreeMap(varIn){
             if(!item.totalCost){item.totalCost=0};
       });
 
-      console.log(playerCountArray)
-
       playerCountArray = premClubs;
       checkTreemapSize()
 }
@@ -330,15 +330,15 @@ function buildTreeMap(dataJSON){
 
 function setCellLabels(d,dir){
   console.log(d)
-    if(dir=="out"){ return d.parent.name +"<br>"+d.parent.displayFee};
-    if(dir=="in"){ return d.name +"<br>"+d.displayFee} ;
+    if(dir=="out"){ return d.parent.name +"<br>"+d.parent.displayFeeNum};
+    if(dir=="in"){ return d.name +"<br>"+d.displayFeeNum} ; 
 }
 
 
 function buildTreeJson(data) {
 
     var r = {}, i, obj;
-    r.name = "All premier league clubs";
+    r.name = rootTitle;
     r.children = [];
 
     var allDealsArr = [];
@@ -348,18 +348,18 @@ function buildTreeJson(data) {
     var allBuysCost = 0;
     
     for ( i = 0; i < data.length; i++) {
-
           var buyGrandChildren = [];
-
           _.each(dataset, function(item,k){
                 if (item.to == data[i]["name"]){
                   var grandChild = {};
                   grandChild.tintColor = data[i].hex;
                   grandChild.name = item.playername;
                   grandChild.price = checkForNumber(item.price)
+                  grandChild.buyCost = checkForNumber(item.price)
                   grandChild.size = checkForNumber(item.price) + 1000000
                   grandChild.value = checkForNumber(item.price) + 1000000
                   grandChild.displayFee = item.displayFee 
+                  grandChild.displayFeeNum = item.itemNumericFee
                   grandChild.buyClub = item.to 
                   grandChild.sellClub = item.from 
                   grandChild.position = item.position
@@ -369,17 +369,18 @@ function buildTreeJson(data) {
                 }
             })
 
-        var sellGrandChildren = [];
-            
+        var sellGrandChildren = [];            
             _.each(dataset, function(item,k){
                 if (item.from == data[i]["name"]){
                   var grandChild = {};
                   grandChild.tintColor = data[i].hex;
                   grandChild.name = item.playername;
                   grandChild.price = checkForNumber(item.price)
+                  grandChild.buyCost = checkForNumber(item.price)
                   grandChild.size = checkForNumber(item.price) + 1000000
                   grandChild.value = checkForNumber(item.price) + 1000000
                   grandChild.displayFee = item.displayFee 
+                  grandChild.displayFeeNum = item.itemNumericFee
                   grandChild.buyClub = item.to 
                   grandChild.sellClub = item.from 
                   grandChild.position = item.position
@@ -387,8 +388,6 @@ function buildTreeJson(data) {
                   sellGrandChildren.push(grandChild)
                   hex = item.hex;
                 }
-                
-
             })     
 
 
@@ -400,6 +399,7 @@ function buildTreeJson(data) {
                   obj.sellCost = data[i].sellCost;
 
                   obj.displayFee = myRound(obj.totalCost)
+                  obj.displayFeeNum =  myRound(obj.totalCost)
                   obj.balanceCost = obj.buyFigure - obj.totalCost;
                   obj.grossCost = obj.buyFigure + obj.totalCost;
 
@@ -489,7 +489,7 @@ function setFeeForDetail(v){
     v = "£"+v+"m"
   }
 
-  return v;
+  return v.toLowerCase();;
 
 }
 
@@ -500,67 +500,69 @@ function setTreeMapDetails(d){
   var c = "buy-list-item";  
   var c2 = "sell-list-item"; 
 
-  
+  a = _.uniq(a, function(item, key, name) { return item.playername; });
+  a2 = _.uniq(a2, function(item, key, name) { return item.playername; });
 
-  if (d.name!= "All premier league clubs") { 
+  if (d.name!= rootTitle) { 
     a = filterArray(a,"to",d.name); 
     c+=" highlight-cell"; 
     a2 = filterArray(a2,"from",d.name); 
-    c2+=" highlight-cell" 
+    c2+=" highlight-cell";
+
 }
   setDetailHead(d); 
-  setTreeMapDetailSell(a2, c2)
-  setTreeMapDetailBuy(a,c)
-  
-
+  setTreeMapDetailSell(a2, c2, d.name);
+  setTreeMapDetailBuy(a,c, d.name);
   
 }
 
-function setTreeMapDetailBuy(a,c){
+function setTreeMapDetailBuy(a,c,nameIn){
 
   var clubVar = "null";
 
   var htmlStr = "  ";
           _.each(a, function(item,i){
-
             var spanClass = "buy-list-item";
 
             if (item.buyClub != clubVar && i != 0){ htmlStr+="<br/>" };
-            if (item.buyClub != clubVar ){ htmlStr+="<span class='"+c+"'><b>"+item.buyClub+"</b></span><br/> "; clubVar=item.buyClub; } 
+            if (item.buyClub != clubVar && nameIn == rootTitle){ htmlStr+="<span class='"+c+"'><b>"+item.buyClub+"</b></span><br/> "; clubVar=item.buyClub; } 
 
-              htmlStr+="<span  id='sellList_"+i+"' class='gv-headline-cap' data-club='"+item.buyClub+"'><b>"+item.playername+"</b> ";
-              htmlStr+=setFeeForDetail(item.displayFee)+", ";
+              htmlStr+="<span  id='sellList_"+i+"' class='"+c+"' data-club='"+item.buyClub+"'>"+item.playername+", ";
+              htmlStr+=setFeeForDetail(item.displayFee)+" ";
               // htmlStr+=getPostionString(item.position);
               htmlStr+=" from "+item.sellClub;
               // htmlStr+="; ";
               
               htmlStr+="</span>";
 
+              if(nameIn==rootTitle){htmlStr+="<br/>";}
+
           })
     htmlStr += "</p>";
-
-    if (a.length == 0){ htmlStr = " "};
+    document.getElementById("playersInHead").style.display = "block";
+    if (a.length == 0){ htmlStr = " "; document.getElementById("playersInHead").style.display = "none";};
     document.getElementById("treeMapDetailBuy").innerHTML = htmlStr;
 }
 
-function setTreeMapDetailSell(a,c){
+function setTreeMapDetailSell(a,c,nameIn){
   var clubVar = "null";
-
   var htmlStr = "  ";
           _.each(a, function(item,i){
 
             var spanClass = "sell-list-item";
 
             if (item.sellClub != clubVar && i != 0){ htmlStr+="<br/>" };
-            if (item.sellClub != clubVar ){ htmlStr+="<span class='"+c+"'><b>"+item.sellClub+"</b></span><br/> "; clubVar=item.sellClub; } 
+            if (item.sellClub != clubVar  && nameIn == rootTitle){ htmlStr+="<span class='"+c+"'><b>"+item.sellClub+"</b></span><br/> "; clubVar=item.sellClub; } 
 
-              htmlStr+="<span  id='sellList_"+i+"' class='gv-headline-cap' data-club='"+item.sellClub+"'><b>"+item.playername+"</b> ";
-              htmlStr+=setFeeForDetail(item.displayFee)+", ";
+              htmlStr+="<span  id='sellList_"+i+"' class='"+c+"' data-club='"+item.sellClub+"'>"+item.playername+", ";
+              htmlStr+=setFeeForDetail(item.displayFee)+" ";
               // htmlStr+=getPostionString(item.position);
               htmlStr+=" to "+item.buyClub;
               // htmlStr+="; ";
               
               htmlStr+="</span>";
+
+              if(nameIn==rootTitle){htmlStr+="<br/>";}
 
           })
     htmlStr += "</p>";
@@ -572,11 +574,12 @@ function setTreeMapDetailSell(a,c){
 
 function setDetailHead(d){
 
-console.log(d)
       if(document.getElementById("grandParentButton")){
+        document.getElementById("instructionTextLabel").style.display = "inline-block";
         document.getElementById("grandParentButton").style.display = "none";
-          if (d.name!="All premier league clubs"){ 
-              document.getElementById("grandParentButton").style.display = "inline-block"; 
+          if (d.name!=rootTitle){ 
+              document.getElementById("grandParentButton").style.display = "inline-block";
+              document.getElementById("instructionTextLabel").style.display = "none"; 
           }
 
             var  n = checkForNumber(d.sellCost-d.buyCost)
@@ -587,13 +590,7 @@ console.log(d)
       }
 }
 
-function setDetailHeadFromMobile(d){
-    var  n = checkForNumber(d.sellCost-d.buyCost)
-                document.getElementById("detailClubname").innerHTML = d.name;
-                document.getElementById("detailBalance").innerHTML = getBalanceStr(myRound(n));
-                document.getElementById("detailSpending").innerHTML = "£"+myRound(d.buyCost)+"m";
-                document.getElementById("detailSales").innerHTML = "£"+myRound(d.sellCost)+"m"; 
-}
+
 
 
 function getBalanceStr(n){
@@ -601,6 +598,10 @@ function getBalanceStr(n){
 
     if (n < 0){
       strOut = "-£"+(n*-1)+"m";
+    }
+
+    if (n == 0){
+      strOut = "£"+(n*-1)+"m";
     }
 
     return strOut;
@@ -791,10 +792,10 @@ function addListeners(){
 
   var interactiveContainer = document.getElementById("interactiveContainer");
        
- window.addEventListener("resize", checkWin);
-        
-
+  window.addEventListener("resize", checkWin);
+ 
   document.getElementById("filterDropdown").addEventListener('change', filterChanged);
+
 }
 
 
@@ -1070,22 +1071,33 @@ function addD3Tree(dataJSON){
                           .attr("class", "cellLabel")
                           .attr("dy", ".75em");  
 
+                      var instructionTextGroup = grandparent.append("g")  
+                          .attr("id","instructionText")
+                          .style("display","block")
+                          .attr("x", 0)
+                          .attr("y",-36) 
+
+                      instructionTextGroup.append("text")
+                          .attr("x", 0)
+                          .attr("y", -30)
+                          .attr("id","instructionTextLabel")
+                          .text("click on a club to see all their signings")
+                          .attr("class", "treemapText")
+                          .attr("dy", ".75em");   
+  
+
 
 
                           // var g1 = svg.insert("g", ".grandparent")
                           // <svg width="24px" height="22px" viewBox="0 0 24 22" id="svgArrow"><path fill="#CC0000" d="M0.62,10.49l1.44-1.44l9-8.989l0.97,0.969L4.521,10h19.12v2 l-19.12-0.001l7.51,8.971l-0.97,0.97l-9-9l-1.44-1.431V10.49"/></svg>    
 
-                      d3.xml("https://visuals.guim.co.uk/gdn-cdn/embed/2016/01/transfer-images/arrow-left.svg", "image/svg+xml", function(error, xml) {
+                      d3.xml("../assets/imgs/arrow-left.svg", "image/svg+xml", function(error, xml) {
                               if (error) throw error;
                               var importedNode = document.importNode(xml.documentElement, true);
                               console.log(importedNode)
                               document.getElementById("grandParentButton").appendChild(importedNode);
                               
                       });    
-
-                     
-                     
-
 
                       d3.json(dataJSON, function() {
                         var root, node;
@@ -1158,6 +1170,9 @@ function addD3Tree(dataJSON){
                               .attr("class", "child ")
                               .attr("class", function(d) { return "child "+(d.buySell); })
                               .style("fill", function(d){return d.tintColor})
+                              .style("stroke-width","1px")
+                              .style("stroke", function(d){return d.tintColor})
+                              
                               .call(rect);
 
                           g.append("rect")
@@ -1175,7 +1190,7 @@ function addD3Tree(dataJSON){
 
                            g.append("text")
                               .attr("dy", "1.3em")
-                              .text(function(d) { return displayFeeCheck(d.displayFee) })
+                              .text(function(d) { var t =  myRound(d.buyCost); if(t==0){ t=" "}; return t;})
                               .attr("class", "cellLabelFee")
                               .call(text);
 
@@ -1245,104 +1260,8 @@ function addD3Tree(dataJSON){
                         }
                       });
 
-  
-
 }
 
-
-
-// function addD3Tree(dataIn){
-
-
-//     var htmlStr = "";
-//     var div,root,node,nodes;
-
-//     var w = d3.select("#treemapFlex").node().getBoundingClientRect().width;
-//     var h = getTreeMapH(w);
-
-//     console.log(dataIn)
-
-//     _.each(dataIn.children, function(obj){
-//             obj.treeMapArea < 2800000 ? obj.treeMapArea = 3000000 : obj.treeMapArea = (obj.treeMapArea+2800000);
-
-//             //obj.treeMapArea += 60000000;
-//         });
-
-
-//      _.sortBy(dataIn.children, function(num){ return dataIn.children.value; });      
-//         //positionDetailView();
-//               treemap = d3.layout.treemap()
-//                 .size([w, h])
-//                 .sticky(false)
-//                 .ratio('3')
-//                 .mode("dice")
-
-//                 .sort(function comparator(a, b) {
-//                     if(a.name == "Other leagues"){
-//                       a.totalCost = 0
-//                     }
-
-//                     if(a.name == "Other countries"){
-//                       a.totalCost = 0
-//                     }
-
-//                   return a.totalCost - b.totalCost;
-//                 })
-
-//                 .round(true)
-//                 .value(function(d) { return d.size });
-
-
-//               div = d3.select("#treemap-view").append("div")
-
-//                 .style("position", "relative")
-//                 .style("width", w + "px")
-//                 .style("height", h+"px")
-//                 .style("opacity",1);
-
-//                 //div.transition().style("height", h+"px").duration(500);
-          
-//                 root = dataIn;
-//                 node = root = dataIn;
-//                 nodes = treemap.nodes(root)
-                
-//             .filter(function(d) { return !d.children; });
-
-//                   div.data([root]).selectAll("div").data(treemap.nodes).enter().append("div").attr("class", function(d) {
-
-//                             if(d.depth > 1 || d.depth == 0) {
-//                                 return "cell hide";
-                                
-//                             } else {
-//                                 return "cell show";
-//                             }
-//                   })
-
-//               .attr("id", function(d) { return "cell_" + d.index; })
-//               .style("background", function(d) { return d.tintColor; })
-
-//               .html(function(d) {
-//                 if(d.name=="Other leagues" || d.name=="Other countries"){
-//                   var cellStr = getPostionStringTreemap(d.name);
-
-//                 }else{
-//                   var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
-//                 }
-//                 return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
-//                 })//return d.children ? color(d.name) : null;
-              
-
-//               .call(cell).on("click", function(d) {  
-//                 zoomToDetailView(d, this); 
-//                 gotoPosition = $(this).offset().top;
-//                 iframeMessenger.getPositionInformation(scrollPage);
-//               });
-              
-//               div.selectAll(".cell").data(treemap.value(function(d) {  return d.treeMapArea; })).call(cell);
-                
-//           //$(".cellCutBlock").hide();
-
-// }
 
 function updateTreeLayout(w,h) 
 { 
@@ -1470,7 +1389,7 @@ function buildTreeJsonMobile(data) {
 
     var root = {}, i, val, obj, othersObj;
 
-    root.name = "All premier league clubs";
+    root.name = rootTitle;
 
     root.children = [];
 
@@ -1478,7 +1397,8 @@ function buildTreeJsonMobile(data) {
 
     var rootSellCost = 0;
 
-        for ( i = 0; i < data.length; i++) {
+        for ( i = 0; i < data.length; i++) { 
+          var tempBuy = 0
           var tempArr = [];
 
                   obj = {};
@@ -1492,7 +1412,7 @@ function buildTreeJsonMobile(data) {
                   obj.treeMapArea = (data[i]["totalCost"]);
                   obj.name = data[i]["name"];
                   
-                  var tempBuy = 0
+                 
                   _.each(dataset, function(item){
 
                         var tempObj = {}
@@ -1505,15 +1425,14 @@ function buildTreeJsonMobile(data) {
                             rootBuyCost+=checkForNumber(item.price);
                         }
                         obj.buyCost = tempBuy; 
+
+
                   })
 
                    
                   var tempSell = 0
                    _.each(dataset, function(item){
-
-                        
                         if (data[i].name == item.from){
-
                             tempSell+=checkForNumber(item.price)
                             rootSellCost+=checkForNumber(item.price);
                         }
@@ -1523,7 +1442,14 @@ function buildTreeJsonMobile(data) {
 
                   //d.sellCost-d.buyCost
                   
-                  obj._children = tempArr;
+                  obj._children = tempArr; 
+
+
+
+                  var uniqueList = removeDuplicates(obj._children)
+
+                  obj._children = uniqueList;
+
             root.buyCost = rootBuyCost;
             root.sellCost = rootSellCost;
             
@@ -1531,147 +1457,288 @@ function buildTreeJsonMobile(data) {
 
         }
 
-
 return root;
 }
   
 
+function removeDuplicates(a){
+  var result = [];
+    a.forEach(function(item) {
+         if(result.indexOf(item) < 0) {
+             result.push(item);
+         }
+    });
+return result;
+
+}
+
 var borderWidth = 0.5;
 
 function buildTreeMapMobile(dataIn){
-    
-    _.each(dataIn.children, function(obj){
+
+    var tempArr = [];
+    var tempCount = 0;
+    _.each(dataIn.children, function(obj,i){
             obj.treeMapArea < 12000000 ? obj.treeMapArea = 12000000 : obj.treeMapArea = (obj.treeMapArea+12000000);
+            if (obj._children.length >0 ){ obj.layoutNum = i;  tempArr.push(obj); tempCount ++;}
         });
-     var el = document.getElementById("treemapFlex");  
-     var wid = el.offsetWidth;   
-     var hei = 420;
-     var div;
 
+    _.sortBy(tempArr, function(num){ return num.size; }); 
 
-     setDetailHeadFromMobile(dataIn);
+     dataIn.children = tempArr;    
+    var unitH = 24; 
+    var el = document.getElementById("treemapFlex");  
+    var wid = el.offsetWidth; 
+    var hei = dataIn.children.length*unitH;
+    var div;
 
-     console.log(dataIn)
+    
 
-     _.sortBy(dataIn.children, function(num){ return dataIn.children.value; });      
-        //positionDetailView();
-              treemap = d3.layout.treemap()
-                .size([wid, hei])
-                .sticky(false)
-                .ratio('3')
-                .mode("dice")
+   // console.log(el)
+    var htmlStr = addTreeDiv(dataIn.children, hei, unitH);
+    //console.log(htmlStr)
+    el.innerHTML = htmlStr;
 
-                .sort(function comparator(a, b) {
-                    if(a.name == "Other leagues"){
-                      a.totalCost = 0
-                    }
-
-                    if(a.name == "Other countries"){
-                      a.totalCost = 0
-                    }
-
-                  return a.totalCost - b.totalCost;
-                })
-
-                .round(true)
-                .value(function(d) { return d.size });
-
-
-              div = d3.select("#treemapFlex").append("div")
-
-                .style("position", "relative")
-                .style("width", wid + "px")
-                .style("height", hei+"px")
-                .style("opacity",1);
-          
-               var root = dataIn;
-               var node = root = dataIn;
-               var nodes = treemap.nodes(root)
-                
-            .filter(function(d) { return !d.children; });
-
-                  div.data([root]).selectAll("div").data(treemap.nodes).enter().append("div").attr("class", function(d) {
-                            if(d.depth > 1 || d.depth == 0) {
-                                return "cell hide";
-                                
-                            } else {
-                                return "cell show";
-                            }
-                  })
-
-              .attr("id", function(d) { return "cell_" + d.index; })
-              .style("background", function(d) { return d.tintColor; })
-
-
-
-              .html(function(d) {
-                if(d.name=="Other leagues" || d.name=="Other countries"){
-                  var cellStr = getPostionStringTreemap(d.name);
-
-                }else{
-                  var cellStr = getPostionStringTreemap(d.name)+":  "+myRound(d.totalCost, 3)+"m";
-                }
-                return "<div class='cellCutBlock'></div><div class='cell-info'><span class='cellLabel'>" + cellStr + "</span><br /><span class='cellValue'></span></div>";
-                })//return d.children ? color(d.name) : null;
+   
+      _.each((document.getElementsByClassName("treemap-mobile-div")), function(item){ 
               
 
-              .call(cell).on("click", function(d) {  
-                zoomToDetailView(d, this); 
-                //iframeMessenger.getPositionInformation(scrollPage);
-              });
+              var num = item.id.split("-");
+              num = num[1];
+              var v = num.split("_");
+              v = v.join(" ")
+            
+              var currClip = document.getElementById(item.id);
               
-              div.selectAll(".cell").data(treemap.value(function(d) {  return d.treeMapArea; })).call(cell);
-
-              function cell() {
-                        this
-                        .style("left", function(d) {
-                          return d.x + "px";
-                          
-                        })
-
-                        .style("top", function(d) {
-                          return d.y + "px";
-                        })
-
-                        .style("width", function(d) {
-                            return Math.max(0, d.dx - borderWidth) + "px";
-                        })
-
-
-                        .style("height", function(d) {
-
-                            return Math.max(0, (d.dy) - borderWidth) + "px";
-                        })
-
-                        //.style("opacity", "0")
-
-                        
-
-                        .style("display", function(d) {
-                          if(d.depth <= 1 && d.depth != 0) {
-                            return "block";
-                          } else {
-                            return "none";
-                          }
-                                  })
-              }
-
-    //this.transition().style("height", h+"px").duration(500);
-
-}
-
-
-     
-function zoomToDetailView(d, currClip) { 
-      _.each((document.getElementsByClassName("cell show")), function(item){ 
-              item.id == currClip.id ? item.style.opacity = 1 : item.style.opacity = 0.4;
-              
-
+              currClip.addEventListener("click", function(){ setTreeMapDetailsMobile(v, currClip); });
       })
-      setDetailHeadFromMobile(d);
-      setTreeMapDetails(d);
-      
+    
+
+
+      var initObj = getInitObjMobile();
+
+    setDetailHeadFromMobile(initObj);
 }
+
+
+function addTreeDiv(a, h=480, sliceH){
+
+  var htmlStr = "<div class='gv-holder-div' style='height:"+480+"px'>";
+
+        _.each(a, function(d, i){
+            var idStr = d.name.split(" ");
+            idStr=idStr.join("_");
+            htmlStr+= "<div class='treemap-mobile-div' style='background-color:"+d.tintColor+"; height:"+sliceH+"px' data-club='"+d.name+"'  id='treeDiv-"+idStr+"'>";
+            htmlStr+= "<div class='cell-mobile-label'>"+d.name+"</div>";
+            htmlStr+="</div>"; 
+
+        })
+        htmlStr +="</div>" 
+     
+
+        return htmlStr;
+}
+
+function getInitObjMobile()
+{
+    var obj  = {};
+    var n = 0;
+    var n2 = 0;
+    var a = filterArrayPrem (allTransfersArr, "to"); 
+    var a2 = filterArrayPrem (allTransfersArr, "from");
+    obj.name = rootTitle;
+
+    a = _.uniq(a, function(item, key, name) { return item.playername; });
+    a2= _.uniq(a2, function(item, key, name) { return item.playername; });
+
+    _.each(a, function(item){
+                item.buyCost = checkForNumber(item.price)  
+                n+=item.buyCost;
+          })
+
+    _.each(a2, function(item){
+                item.sellCost = checkForNumber(item.price)  
+                n2+=item.sellCost;
+          })
+
+      obj.buyCost = n;
+      obj.sellCost = n2;
+
+      return(obj)
+
+
+}
+
+
+function setTreeMapDetailsMobile(v,currClip){
+  var slices = document.getElementsByClassName("treemap-mobile-div");
+  
+  _.each(slices, function(item){
+      item.id == currClip.id ? item.style.opacity = 1 : item.style.opacity = 0.4; 
+
+  })
+ 
+  var a = filterArrayPrem (allTransfersArr, "to"); 
+  var a2 = filterArrayPrem (allTransfersArr, "from");
+
+  var c = "buy-list-item";  
+  var c2 = "sell-list-item"; 
+
+  var n = 0;
+  var n2 = 0;
+
+  // var tempObj = {};
+  // var tempObj2 = {};
+  var obj = {};
+
+  _.each(dataset, function(item){
+        if (item.to == v){
+            item.buyCost = checkForNumber(item.price)
+            item.buySell = "buy";
+            a.push (item)
+            n+=item.buyCost
+
+        }
+  })
+
+  _.each(dataset, function(item){
+        if (item.from == v){
+                  item.sellCost = checkForNumber(item.price)  
+                  item.buySell = "sell";          
+                  a2.push (item)
+                  
+              }
+        })
+
+  
+
+  a = _.uniq(a, function(item, key, name) { return item.playername; });
+  a2= _.uniq(a2, function(item, key, name) { return item.playername; });
+
+
+
+
+var t = 0;
+  _.each(a, function(item){
+    
+
+      if(item.to == v){
+        t+=checkForNumber(item.price);
+      }
+
+    n=t;
+
+    console.log(n)
+     
+  })
+var t2 = 0;
+  _.each(a2, function(item){
+    
+     if(item.from == v){
+        t2 += checkForNumber(item.price);
+      }
+
+      n2=t2;
+
+  })
+  
+
+console.log(n,n2)
+
+  obj.buyCost = n;
+  obj.sellCost = n2;
+  obj.name = v;
+ 
+
+
+  setDetailHeadFromMobile(obj);
+  setDetailMobileSell(a2,c2,v);
+  setDetailMobileBuy(a,c,v);
+}
+
+
+function setDetailHeadFromMobile(d){
+
+    console.log(d)
+
+    var  n = checkForNumber(d.sellCost-d.buyCost)
+                document.getElementById("detailClubname").innerHTML = d.name;
+                document.getElementById("detailBalance").innerHTML = getBalanceStr(myRound(n));
+                document.getElementById("detailSpending").innerHTML = "£"+myRound(d.buyCost)+"m";
+                document.getElementById("detailSales").innerHTML = "£"+myRound(d.sellCost)+"m"; 
+}
+
+
+
+function setDetailMobileBuy(a,c,v){
+
+  var htmlStr = "  ";
+          _.each(a, function(item,i){
+
+            var spanClass = "buy-list-item";
+              
+              if(item.to == v)  
+              {
+                console.log(item)
+                htmlStr+="<span id='sellList_"+i+"' class='"+c+"' data-club='"+item.buyClub+"'>"+item.playername+", ";
+                htmlStr+=setFeeForDetail(item.displayFee)+" ";
+                htmlStr+=" from "+item.sellClub;
+                htmlStr+="</span><br/>";
+              }          
+
+              
+          })    
+    document.getElementById("playersInHead").style.display = "block";
+    if (a.length == 0){ htmlStr = " "; document.getElementById("playersInHead").style.display = "none";};
+    document.getElementById("treeMapDetailBuy").innerHTML = htmlStr;
+}
+
+
+
+
+function setDetailMobileBuyAllTeams(a,c,v){
+  var htmlStr = "  ";
+          _.each(a, function(item,i){
+            var spanClass = "buy-list-item";
+
+              htmlStr+="<span id='sellList_"+i+"' class='"+c+"' data-club='"+item.buyClub+"'>"+item.playername+", ";
+              htmlStr+=setFeeForDetail(item.displayFee)+" ";
+              // htmlStr+=getPostionString(item.position);
+              htmlStr+=" from "+item.sellClub;
+              // htmlStr+="; ";
+  
+              htmlStr+="</span><br/>";
+          })
+    document.getElementById("playersInHead").style.display = "block";
+    if (a.length == 0){ htmlStr = " "; document.getElementById("playersInHead").style.display = "none";};
+    document.getElementById("treeMapDetailBuy").innerHTML = htmlStr;
+}
+
+
+function setDetailMobileSell(a,c,v){
+
+  var htmlStr = "  ";
+          _.each(a, function(item,i){
+
+            var spanClass = "sell-list-item";
+              
+              if(item.from == v)  
+              {
+                console.log(item)
+                htmlStr+="<span id='sellList_"+i+"' class='"+c+"' data-club='"+item.sellClub+"'>"+item.playername+", ";
+                htmlStr+=setFeeForDetail(item.displayFee)+" ";
+                htmlStr+=" to "+item.buyClub;
+                htmlStr+="</span><br/>";
+              }   
+
+          })
+
+    document.getElementById("playersOutHead").style.display = "block";
+    if (a.length == 0){ htmlStr = " "; document.getElementById("playersOutHead").style.display = "none";}
+    document.getElementById("treeMapDetailSell").innerHTML = htmlStr;
+}
+     
+
 
 
 /////////////////////////////////////////END MOBILE TREEMAP////////////////////////////////////////

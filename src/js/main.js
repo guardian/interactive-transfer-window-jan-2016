@@ -1091,7 +1091,7 @@ function addD3Tree(dataJSON){
                           // var g1 = svg.insert("g", ".grandparent")
                           // <svg width="24px" height="22px" viewBox="0 0 24 22" id="svgArrow"><path fill="#CC0000" d="M0.62,10.49l1.44-1.44l9-8.989l0.97,0.969L4.521,10h19.12v2 l-19.12-0.001l7.51,8.971l-0.97,0.97l-9-9l-1.44-1.431V10.49"/></svg>    
 
-                      d3.xml("../assets/imgs/arrow-left.svg", "image/svg+xml", function(error, xml) {
+                      d3.xml("https://interactive.guim.co.uk/2016/01/transfer-window-updated/images/arrow-left.svg", "image/svg+xml", function(error, xml) {
                               if (error) throw error;
                               var importedNode = document.importNode(xml.documentElement, true);
                               console.log(importedNode)
@@ -1658,8 +1658,6 @@ console.log(n,n2)
 
 
 function setDetailHeadFromMobile(d){
-
-    console.log(d)
 
     var  n = checkForNumber(d.sellCost-d.buyCost)
                 document.getElementById("detailClubname").innerHTML = d.name;
