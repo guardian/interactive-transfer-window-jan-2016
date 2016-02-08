@@ -1067,7 +1067,7 @@ function addD3Tree(dataJSON){
                           .attr("x", 24)
                           .attr("y", -30)
                           .attr("id","grandParentButtonLabel")
-                          .text("show all clubs")
+                          .text("show all")
                           .attr("class", "cellLabel")
                           .attr("dy", ".75em");  
 
