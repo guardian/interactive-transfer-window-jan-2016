@@ -21,7 +21,7 @@ var treemap;
 var myView = false;
 var rootTitle = "All clubs";
 
-var globalSortVar = "to";
+var globalSortVar = "clubRef";
 var mobileWin = 739;
 
 var cellPad = {t:12, b:0, r:0, l:6};
@@ -47,10 +47,6 @@ var premClubs= [ {name:'Arsenal', hex:'#000000'},
 { name:'Watford', hex:'#96DBC9' },
 { name:'West Ham United', hex:'#41709D' }
 ];
-
-
-var color
-
 
 var colorsArr = [ { hex:'#000000'},
 { hex:'#00001D'},
@@ -133,28 +129,24 @@ function addBuySell(a){
   var sellArr = filterArrayAddValue(a, "previousleague", "Premier League (England)","premSold",true); 
   var buyArr = filterArrayAddValue(a, "newleague", "Premier League (England)","premBought",true);
   var tempArr = sellArr.concat(buyArr); 
+
+// set some references so we can search for prem transfers
+  _.each(tempArr, function(item){
+        if(item.premSold && !item.premBought){
+            item.buyOrSell = "s";
+            
+        }
+        if(!item.premSold && item.premBought){
+            item.buyOrSell = "b";
+            
+        }
+        if(item.premSold && item.premBought){
+            item.buyOrSell = "bs";
+            
+        }
+  })
   var children = _.uniq(tempArr);
 
-  // set some references so we can search for prem transfers
-    _.each(children, function(child,i){
-            if(child.premSold){
-              child.premSeller = child.from;
-              //console.log(child.name+" ------------- sold by "+child.premSeller)
-            }
-            if(child.premBought){
-              child.premBuyer = child.to;
-              //console.log(child.name+" ------------- bought by "+child.premBuyer)
-            }
-            if(child.premBought && !child.premSold){
-              child.premSold = false;
-              child.premSeller = false;
-
-            }
-            if(!child.premBought && child.premSold){
-                child.premBought = false;
-                child.premBuyer = false;
-            }
-           })
   return children;
 }
 
@@ -555,11 +547,25 @@ function addListeners(){
 
 
 function filterChanged(event) {
- 
     var varIn = this.value;
     globalSortVar=varIn;
-    buildTreeJson(dataset)
- 
+    if(globalSortVar == "clubRef"){
+        clubTreeJson(dataset)
+    }
+    if(globalSortVar != "clubRef"){
+      buildTreeJson(dataset)
+    }
+}
+
+function checkForPremClub(str){
+  var bool = false;
+  _.each(premClubs, function(item){
+          if(str == item.name){
+              bool = true;
+          }
+  })
+
+  return bool;
 }
 
 
@@ -570,79 +576,137 @@ function getCountByProperty(data, property) {
 }
 
 
+
 function getNewDataArr(a){
       var objOut;
-      console.log(a)
+      
       if (globalSortVar != "leagueSelect" || globalSortVar != "clubSelect" ){
         objOut = _.groupBy(a, globalSortVar);
       }
       
-      // if (globalSortVar == "clubSelect"){
-      //   var tempArrBuy =  _.groupBy(a, "to");
-      //   var tempArrSell = _.groupBy(a, "from");
-      //   var holdArr = [];
-      //         _.each(tempArrBuy, function(item){
-      //               _.each(premClubsArr, function(obj){
-      //                   if (item.to == obj.name){
-      //                           holdArr.push(item)
-      //                   }
-      //             })
-      //         })
-
-      //         _.each(tempArrSell, function(item){
-      //               _.each(premClubsArr, function(obj){
-      //                   if (item.from == obj.name){
-      //                           holdArr.push(item)
-      //                   }
-      //             })
-      //         })
-      //     objOut = holdArr;
-      // }
-
-      if (globalSortVar == "leagueSelect"){
-        var arrOne = _.groupBy(a, "previousleague");
-        var arrTwo = _.groupBy(a, "newleague");
-        var arrThree = [];
-
-        _.each(arrOne, function(item1, k1){
-                     _.each(arrTwo, function(item2, k2){
-                            if (k1 == k2){
-                                  var newArr = item1.concat(item2);
-                                  // need to convert this to usable data - look at objOut structure from one dimensional inputs
-                                  console.log(k1,newArr)
-                                  console.log("continue working here")
-                            }
-                      })
-              })
-                    
-              
-        }
-
-
       return objOut;
 }
 
+function get2dDataArr(a){
+
+          var arrOne = _.groupBy(a, "previousleague");
+          var arrTwo = _.groupBy(a, "newleague");
+          var arrThree = [];
+
+              _.each(arrOne, function(item1, k1){
+                     _.each(arrTwo, function(item2, k2){
+                          if (k1 == k2){
+                                var newArr = item1.concat(item2);
+                                // need to convert this to usable data - look at objOut structure from one dimensional inputs
+                                console.log(k1,newArr)
+                                console.log("continue working here")
+                          }
+                    })
+                })  
+
+      
+}
 
 
+function clubTreeJson(data) {
+    var r = {}, i, obj;
+    r.name = globalSortVar;
 
+    var gatherParents = [];
+  
+    var totalCost;
+    var allSalesCost = 0;
+    var allBuysCost = 0;
+
+    
+    //var guColorScale = d3.scale.ordinal().domain([0, 100]).range(colorbrewer.RdBu[12]);
+
+    var colorRamp = d3.scale.linear().domain([0, Object.keys(premClubs).length]).range(["#001e43","#4bc6df"]); 
+    var key = -1;
+    
+     _.each(premClubs, function(parent){
+         key++;
+         var buyBucket = [];
+         var sellBucket = []; 
+         var parentObj = {};
+         var gatherChildren = [];
+         var childrenBuyCost = 0;
+         var childrenSellCost = 0;
+         parentObj.name = parent.name;
+         
+
+         _.each(dataset, function(child,k){
+                child.ageGroup = getAgeGroup(child)
+                child.tintColor = colorRamp(key)
+                console.log("check the b,s,bs buyOrSell var here - for bs compare child.from and child.to to parentObj.name")
+                if (child.to == parent.name){ //&& child.buyOrSell !="bs"
+                  childrenBuyCost+=checkForNumber(child.price);
+                  gatherChildren.push(child)
+                }
+
+                if (child.from == parent.name  ){ //&& child.buyOrSell !="bs"
+                  childrenSellCost+=checkForNumber(child.price) ;
+                  gatherChildren.push(child)
+                }
+                
+           }) 
+
+           // _.each(parent, function(child){
+            
+                
+           //      child.buyCost = checkForNumber(child.price); 
+           //      if (child.buyOrSell=="b"){ childrenBuyCost+=child.buyCost; } 
+           //      if (child.buyOrSell=="s"){ childrenSellCost+=child.buyCost; }
+           //      // run a condition to check for club here - use parentObj.name?
+           //      if (child.buyOrSell=="bs"){ childrenBuyCost+=child.buyCost; childrenSellCost+=child.sellCost; }
+           //      child.size = checkForNumber(child.price) + 1000000
+           //      child.value = checkForNumber(child.price) + 1000000
+           //      child.ageGroup = getAgeGroup(child)
+           //      child.tintColor = colorRamp(key)
+
+           //      //gatherChildren.push(child)
+
+           // }) 
+
+       parentObj.tintColor = colorRamp(key);  
+       parentObj.buyCost = childrenBuyCost; 
+       parentObj.salesCost = childrenSellCost;
+       parentObj.children = gatherChildren;
+       gatherParents.push (parentObj);
+       allBuysCost += childrenBuyCost; 
+       allSalesCost+=childrenSellCost;
+
+    })
+
+     r.children = gatherParents;
+     r.buyCost = allBuysCost;
+     r.sellCost = allSalesCost;
+
+     console.log("continue here Weds")
+     console.log(r)
+   addD3Tree(r)
+
+    
+}
 
 
 function buildTreeJson(data) {
-
     var r = {}, i, obj;
     r.name = globalSortVar;
-    var gatherParents = [];
 
+    var gatherParents = [];
     var hex;
     var totalCost;
     var allSalesCost = 0;
     var allBuysCost = 0;
-    var a = getNewDataArr(data)
 
+    var a = getNewDataArr(data)
     //var guColorScale = d3.scale.ordinal().domain([0, 100]).range(colorbrewer.RdBu[12]);
 
     var colorRamp = d3.scale.linear().domain([0, Object.keys(a).length]).range(["#001e43","#4bc6df"]); 
     var key = -1;
+
+
      _.each(a, function(parent){
          key++;
           
@@ -652,11 +716,13 @@ function buildTreeJson(data) {
          var childrenSellCost = 0;
 
            _.each(parent, function(child){
+            console.log(child.buyOrSell, parentObj.name)
                 parentObj.name = child[globalSortVar];
                 child.buyCost = checkForNumber(child.price); 
-                if (child.premBought && !child.premSold){ childrenBuyCost+=child.buyCost; } 
-                if (child.premSold && !child.premBought){ childrenSellCost+=child.buyCost; }
-                if (child.premSold && child.premBought){ childrenBuyCost+=child.buyCost; childrenSellCost+=child.sellCost; }
+                if (child.buyOrSell=="b"){ childrenBuyCost+=child.buyCost; } 
+                if (child.buyOrSell=="s"){ childrenSellCost+=child.buyCost; }
+                // run a condition to check for club here - use parentObj.name?
+                if (child.buyOrSell=="bs"){ childrenBuyCost+=child.buyCost; childrenSellCost+=child.sellCost; }
                 child.size = checkForNumber(child.price) + 1000000
                 child.value = checkForNumber(child.price) + 1000000
                 child.ageGroup = getAgeGroup(child)
@@ -666,13 +732,13 @@ function buildTreeJson(data) {
 
            }) 
 
-         parentObj.tintColor = colorRamp(key);  
-         parentObj.buyCost = childrenBuyCost; 
-         parentObj.salesCost = childrenSellCost;
-         parentObj.children = gatherChildren;
-         gatherParents.push (parentObj);
-         allBuysCost += childrenBuyCost; 
-         allSalesCost+=childrenSellCost;
+       parentObj.tintColor = colorRamp(key);  
+       parentObj.buyCost = childrenBuyCost; 
+       parentObj.salesCost = childrenSellCost;
+       parentObj.children = gatherChildren;
+       gatherParents.push (parentObj);
+       allBuysCost += childrenBuyCost; 
+       allSalesCost+=childrenSellCost;
 
     })
 
